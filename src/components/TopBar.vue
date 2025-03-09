@@ -2,7 +2,7 @@
   <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
       <router-link to="/" class="logo d-flex align-items-center">
-        <span>CLUB ERP</span>
+        <span>MY RESUME</span>
         <!-- <img class="mainlogo" src="@/assets/img/logo.png" style="height: 35px" alt="logo"> -->
         <!-- <img class="altlogo" src="@/assets/img/logo.png" style="height: 30px" alt="logo"> -->
       </router-link>
@@ -62,20 +62,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.header {
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 10px 20px;
-}
-.logo {
-  text-decoration: none;
-  font-weight: bold;
-  color: #333;
-}
-.nav-profile img {
-  width: 40px;
-  height: 40px;
-}
-</style>

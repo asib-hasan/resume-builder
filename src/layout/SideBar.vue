@@ -5,7 +5,7 @@
       <MenuBar />
       <div class="content">
         <router-view />
-        <Footer />
+        <FooTer />
       </div>
     </div>
   </div>
@@ -14,9 +14,9 @@
 <script>
 import TopBar from '@/components/TopBar.vue'
 import MenuBar from '@/components/MenuNav.vue'
-import Footer from '@/components/Footer.vue'
+import FooTer from '@/components/Footer.vue'
 
 export default {
-  components: { TopBar, MenuBar, Footer },
+  components: { TopBar, MenuBar, FooTer },
 }
 </script>

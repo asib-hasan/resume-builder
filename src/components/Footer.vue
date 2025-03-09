@@ -13,3 +13,9 @@
     </a>
   </footer>
 </template>
+
+<script>
+export default {
+  name: 'FooTer',
+}
+</script>
