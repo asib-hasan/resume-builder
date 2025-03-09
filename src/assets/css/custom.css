@@ -1,0 +1,227 @@
+.card-header:first-child{
+    border-radius: 0px;
+}
+.card-header, .card-footer {
+    padding: 5px 5px !important;
+    border-color: black;
+    background-color: rgba(0, 0, 0, 0.095) !important;
+    color: black;
+    font-weight: bold;
+    font-size: 11px;
+    border-bottom: none !important;
+    border-radius: 0px;
+}
+.list-group-item.active{
+    background-color: rgba(0, 0, 0, 0.095) !important;
+    border-color: rgba(0, 0, 0, 0.095) !important;
+    color: black;
+}
+.icon-margin-right-left{
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 10px;
+}
+.table-th-width-5{
+    width: 5% !important;
+}
+.table-th-width-8{
+    width: 8% !important;
+}
+.table-th-width-9{
+    width: 9% !important;
+}
+.table-th-width-10{
+    width: 10% !important;
+}
+.table-th-width-15{
+    width: 15% !important;
+}
+.table-th-width-20{
+    width: 20% !important;
+}
+.table-th-width-25{
+    width: 25% !important;
+}
+.table-th-width-30{
+    width: 30% !important;
+}
+.table-th-width-35{
+    width: 35% !important;
+}
+.table-th-width-40{
+    width: 40% !important;
+}
+.table-th-width-50{
+    width: 50% !important;
+}
+.table-th-width-60{
+    width: 60% !important;
+}
+.table-th-width-70{
+    width: 70% !important;
+}
+.table-th-width-75{
+    width: 75% !important;
+}
+.table-th-width-80{
+    width: 80% !important;
+}
+.table-th-width-90{
+    width: 90% !important;
+}
+.table-td-width-75{
+    width: 75% !important;
+}
+.table-td-width-80{
+    width: 80% !important;
+}
+.table-td-width-90{
+    width: 90% !important;
+}
+.table-td-width-30{
+    width: 30% !important;
+}
+.table-td-width-5{
+    width: 5% !important;
+}
+.table-td-width-15{
+    width: 15% !important;
+}
+.table-td-width-20{
+    width: 20% !important;
+}
+.table-td-width-33{
+    width: 33% !important;
+}
+.table-td-width-34{
+    width: 34% !important;
+}
+.table-td-width-40{
+    width: 40% !important;
+}
+.table-td-width-50{
+    width: 50% !important;
+    white-space: nowrap !important;
+}
+.td-font-color{
+    color: #787878 !important;
+}
+.counter{
+    font-size: 11px;
+    font-weight: bold;
+}
+.tab-content{
+    padding: 15px;
+    background: white;
+    border-left: 1px solid rgba(0, 0, 0, 0.095);
+    border-right: 1px solid rgba(0, 0, 0, 0.095);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.095)
+}
+.nav-active{
+    background: rgba(0, 0, 0, 0.095) !important;
+}
+.card-header-action-btn{
+    border: 1px solid !important;
+    border-radius: 20px;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    float: right !important;
+    background: white !important;
+}
+.table{
+    border-color: lightgray !important
+}
+.bg-secondary{
+    background-color: #ced4da !important;
+    color: black !important;
+}
+.btn-primary, .btn-success, .btn-danger, .btn-info, .btn-warning, .btn-secondary{
+    font-weight: bold !important;
+}
+.custom-badge{
+    border: 1px solid maroon;
+    border-radius: 20px;
+    padding: 0 5px;
+    color: maroon;
+    font-weight: bold;
+}
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #ddd;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: black;
+}
+.dashboard .info-card {
+    padding-bottom: 10px;
+}
+.dashboard .info-card h6 {
+    font-size: 11px;
+    color: #012970;
+    font-weight: 700;
+    margin: 0;
+    padding: 0;
+}
+
+.card-title {
+    padding: 20px 0 15px 0;
+    font-size: 11px;
+    font-weight: bold;
+    color: #012970;
+}
+.tab-style{
+    border-top: 1px solid lightgray;
+    border-left: 1px solid lightgray;
+    border-right: 1px solid lightgray;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-size: 11px;
+}
+.tab-style a{
+    color: black !important;
+}
+
+.btn-outline-secondary{
+    font-weight: bold !important;
+    border: 1px solid #ced4da !important;
+}
+.filter-table{
+    box-sizing: border-box;
+    border: 1px solid lightgray;
+    outline: lightgray;
+    border-radius: 0px;
+    border-color: lightgray;
+    padding: 4px 4px 4px 10px;
+    box-shadow: none;
+}
+.filter-table:focus{
+    border: 1px solid lightgray;
+    outline: lightgray;
+    border-radius: 0px;
+    border-color: lightgray;
+    box-shadow: none;
+    color: black;
+}
+.blink {
+    animation: blinker 3.5s linear infinite;
+    color: maroon;
+    font-family: sans-serif;
+}
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.btn{
+    padding: 4px 8px !important;
+    font-size: 12px;
+}
+.btn:hover{
+    background-color: black;
+}
