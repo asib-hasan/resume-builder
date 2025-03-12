@@ -8,6 +8,16 @@ const router = createRouter({
       name: 'dashboard',
       component: () => import('../views/DashBoard.vue'),
     },
+    {
+      path: '/resume/profile',
+      name: 'resume-profile',
+      component: () => import('../views/my-resume/Profile.vue'),
+    },
+    {
+      path: '/resume/experience',
+      name: 'resume-experience',
+      component: () => import('../views/my-resume/Experience.vue'),
+    },
   ],
 })
 

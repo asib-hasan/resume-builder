@@ -28,6 +28,12 @@
       </li>
       <li class="nav-item">
         <router-link class="nav-link" to="/profile">
+          <i class="bi bi-clipboard"></i>
+          <span>Web Contents</span>
+        </router-link>
+      </li>
+      <li class="nav-item">
+        <router-link class="nav-link" to="/profile">
           <i class="bi bi-globe"></i>
           <span>Website</span>
         </router-link>
