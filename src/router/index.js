@@ -11,12 +11,12 @@ const router = createRouter({
     {
       path: '/resume/profile',
       name: 'resume-profile',
-      component: () => import('../views/my-resume/Profile.vue'),
+      component: () => import('../views/my_resume/Profile.vue'),
     },
     {
       path: '/resume/experience',
       name: 'resume-experience',
-      component: () => import('../views/my-resume/Experience.vue'),
+      component: () => import('../views/my_resume/Experiences.vue'),
     },
   ],
 })
