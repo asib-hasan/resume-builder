@@ -1,10 +1,8 @@
 <template>
   <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
-      <router-link to="/" class="logo d-flex align-items-center">
-        <span>MY RESUME</span>
-        <!-- <img class="mainlogo" src="@/assets/img/logo.png" style="height: 35px" alt="logo"> -->
-        <!-- <img class="altlogo" src="@/assets/img/logo.png" style="height: 30px" alt="logo"> -->
+      <router-link to="/dashboard" class="logo d-flex align-items-center">
+        <span>MY PROFILE</span>
       </router-link>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div>
