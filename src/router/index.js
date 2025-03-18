@@ -18,6 +18,11 @@ const router = createRouter({
       name: 'resume-experience',
       component: () => import('../views/my_resume/Experiences.vue'),
     },
+    {
+      path: '/',
+      name: 'login',
+      component: () => import('../views/LoginPage.vue'),
+    },
   ],
 })
 

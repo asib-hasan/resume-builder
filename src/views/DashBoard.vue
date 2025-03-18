@@ -2,7 +2,7 @@
 import SideBar from '@/layout/SideBar.vue'
 import useVuelidate from '@vuelidate/core'
 import { required, email, minLength, numeric } from '@vuelidate/validators'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 export default {
   components: { SideBar },
