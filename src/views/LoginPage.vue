@@ -1,49 +1,52 @@
 <script>
-import useVuelidate from '@vuelidate/core'
-import { required, email, minLength, numeric } from '@vuelidate/validators'
 import { ref } from 'vue'
+import axios from 'axios'
+import useVuelidate from '@vuelidate/core'
+import { required, email } from '@vuelidate/validators'
+import { useRouter } from 'vue-router'
 
 export default {
   setup() {
+    const router = useRouter()
+
     // Form Data
     const form = ref({
-      first_name: '',
-      last_name: '',
-      gender: '',
-      dob: '',
-      marital_status: '',
-      profession: '',
-      address: '',
-      phone: '',
       email: '',
+      password: '',
     })
 
     // Validation Rules
     const rules = {
-      first_name: { required },
-      last_name: { required },
-      gender: { required },
-      dob: { required },
-      marital_status: { required },
-      profession: { required },
-      address: { required },
-      phone: { required, numeric, minLength: minLength(10) },
       email: { required, email },
+      password: { required },
     }
 
     // Vuelidate Instance
     const v$ = useVuelidate(rules, form)
 
+    // Error Message
+    const errorMessage = ref(null)
+
     // Form Submission
-    const submitForm = () => {
+    const submitForm = async () => {
       v$.value.$validate() // Trigger validation
-      if (!v$.value.$error) {
-        alert('Form submitted successfully!')
-        // Proceed with form submission logic
+      if (v$.value.$error) return // Stop if validation fails
+
+      try {
+        const response = await axios.post('http://localhost/resume-builder/api/login', {
+          email: form.value.email,
+          password: form.value.password,
+        })
+
+        localStorage.setItem('token', response.data.token) // Store JWT token
+        errorMessage.value = null // Clear errors
+        router.push('/dashboard') // Redirect on success
+      } catch (error) {
+        errorMessage.value = error.response?.data?.error || 'Login failed'
       }
     }
 
-    return { form, v$, submitForm }
+    return { form, v$, submitForm, errorMessage }
   },
 }
 </script>
@@ -60,52 +63,46 @@ export default {
               <div class="card mb-3">
                 <div class="card-body">
                   <div class="mt-4 mb-4">
-                    <!--<div class="d-flex justify-content-center mb-2">
-                                                <a href=""><img src="" style="height: 80px" alt="logo"></a>
-                                            </div>-->
                     <div class="d-flex justify-content-center">
                       <a href="" class="logo d-flex align-items-center w-auto"
                         ><span>My Profile</span></a
                       >
                     </div>
                   </div>
-                  <form class="row g-3" method="GET" action="dashboard.php">
+
+                  <form class="row g-3" @submit.prevent="submitForm">
+                    <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
                     <div class="col-12">
                       <div class="form-floating">
                         <input
-                          type="text"
+                          type="email"
                           class="form-control"
-                          id="email"
-                          name="email"
-                          value=""
+                          v-model="form.email"
                           placeholder="Enter User ID"
-                          required
                         />
-                        <label for="username">Username or Email</label>
+                        <label for="email">Email</label>
+                        <small v-if="v$.email.$error" class="text-danger">Invalid email</small>
                       </div>
                     </div>
+
                     <div class="col-12">
                       <div class="form-floating">
                         <input
                           type="password"
                           class="form-control"
-                          id="password"
-                          name="password"
-                          value=""
+                          v-model="form.password"
                           placeholder="Enter Password"
-                          required
                         />
                         <label for="password">Password</label>
+                        <small v-if="v$.password.$error" class="text-danger"
+                          >Password is required</small
+                        >
                       </div>
                     </div>
+
                     <div class="col-12">
-                      <button
-                        class="btn btn-primary w-100"
-                        type="submit"
-                        style="background: black; border: 1px solid black"
-                      >
-                        SIGN IN
-                      </button>
+                      <button class="btn btn-primary w-100" type="submit">SIGN IN</button>
                     </div>
                   </form>
                 </div>
