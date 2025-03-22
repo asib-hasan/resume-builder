@@ -99,50 +99,19 @@ export default {
                 <div v-if="v$.dob.$error" class="text-danger">End date required</div>
               </div>
 
+              <div class="col-md-12">
+                <button class="btn btn-danger">
+                  <i class="bi bi-cpu"></i> Ask AI for Assistance
+                </button>
+              </div>
               <div class="col-md-4">
                 <label class="form-label"
-                  >Marital Status <span class="required-mask">*</span></label
+                  >Responsibilities <span class="required-mask">*</span></label
                 >
-                <select v-model="form.marital_status" class="form-select">
-                  <option value="">-- Select --</option>
-                  <option value="1">Single</option>
-                  <option value="2">Married</option>
-                  <option value="3">Divorced</option>
-                </select>
-                <div v-if="v$.marital_status.$error" class="text-danger">
-                  Marital status is required
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Profession <span class="required-mask">*</span></label>
-                <input
-                  v-model="form.profession"
-                  type="text"
-                  class="form-control"
-                  placeholder="eg. Professor"
-                />
-                <div v-if="v$.profession.$error" class="text-danger">Profession is required</div>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Address <span class="required-mask">*</span></label>
-                <input v-model="form.address" type="text" class="form-control" />
-                <div v-if="v$.address.$error" class="text-danger">Address is required</div>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Phone <span class="required-mask">*</span></label>
-                <input v-model="form.phone" type="text" class="form-control" />
+                <textarea v-model="form.phone" type="text" class="form-control" />
                 <div v-if="v$.phone.$error" class="text-danger">
                   Phone must be at least 10 digits
                 </div>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Email <span class="required-mask">*</span></label>
-                <input v-model="form.email" type="email" class="form-control" />
-                <div v-if="v$.email.$error" class="text-danger">Valid email is required</div>
               </div>
 
               <div class="col-md-4">

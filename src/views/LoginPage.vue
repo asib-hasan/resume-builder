@@ -42,6 +42,7 @@ export default {
         errorMessage.value = null // Clear errors
         router.push('/dashboard') // Redirect on success
       } catch (error) {
+        alert(error)
         errorMessage.value = error.response?.data?.error || 'Login failed'
       }
     }
