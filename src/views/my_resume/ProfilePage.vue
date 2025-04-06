@@ -67,10 +67,9 @@ export default {
               <a href="#" class="nav-link active font-weight-bold">Personal</a>
             </li>
             <li class="nav-item tab-style">
-              <a href="#" class="nav-link font-weight-bold">Experience</a>
-            </li>
-            <li class="nav-item tab-style">
-              <a href="#" class="nav-link font-weight-bold">Tab Three</a>
+              <router-link to="/resume/experience" class="nav-link font-weight-bold"
+                >Experience</router-link
+              >
             </li>
           </ul>
           <div class="tab-content">

@@ -9,7 +9,7 @@
         </router-link>
       </li>
       <li class="nav-item">
-        <router-link class="nav-link" to="/profile">
+        <router-link class="nav-link" to="/resume/profile">
           <i class="bi bi-person-circle"></i>
           <span>My Resume</span>
         </router-link>

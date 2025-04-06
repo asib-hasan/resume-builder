@@ -1,51 +1,66 @@
 <script>
 import SideBar from '@/layout/SideBar.vue'
 import useVuelidate from '@vuelidate/core'
-import { required, email, minLength, numeric } from '@vuelidate/validators'
+import { required } from '@vuelidate/validators'
 import { ref } from 'vue'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
 export default {
-  components: { SideBar },
+  components: {
+    SideBar,
+    QuillEditor,
+  },
   setup() {
-    // Form Data
+    // Form data
     const form = ref({
       first_name: '',
       last_name: '',
-      gender: '',
       dob: '',
-      marital_status: '',
-      profession: '',
-      address: '',
-      phone: '',
-      email: '',
+      end_date: '',
+      responsibilities: '',
     })
 
-    // Validation Rules
+    // Validation rules
     const rules = {
       first_name: { required },
       last_name: { required },
-      gender: { required },
       dob: { required },
-      marital_status: { required },
-      profession: { required },
-      address: { required },
-      phone: { required, numeric, minLength: minLength(10) },
-      email: { required, email },
+      end_date: { required },
+      responsibilities: { required },
     }
 
-    // Vuelidate Instance
     const v$ = useVuelidate(rules, form)
 
-    // Form Submission
+    // Form submit
     const submitForm = () => {
-      v$.value.$validate() // Trigger validation
+      v$.value.$validate()
       if (!v$.value.$error) {
-        alert('Form submitted successfully!')
-        // Proceed with form submission logic
+        alert('Form submitted successfully!\nResponsibilities: ' + form.value.responsibilities)
       }
     }
 
-    return { form, v$, submitForm }
+    // Ask AI loading state
+    const isLoading = ref(false)
+
+    // Ask AI handler
+    const askAI = () => {
+      isLoading.value = true
+
+      // Simulate an API call
+      setTimeout(() => {
+        isLoading.value = false
+        alert('AI response: "Here is a suggestion for your responsibilities..."')
+      }, 2000)
+    }
+
+    return {
+      form,
+      v$,
+      submitForm,
+      askAI,
+      isLoading,
+    }
   },
 }
 </script>
@@ -64,13 +79,14 @@ export default {
         <div class="col-md-12">
           <ul class="nav nav-tabs nav-tabs-bordered d-flex">
             <li class="nav-item tab-style">
-              <a href="#" class="nav-link font-weight-bold">Personal</a>
+              <router-link to="/resume/profile" class="nav-link font-weight-bold"
+                >Personal</router-link
+              >
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link active font-weight-bold">Experience</a>
-            </li>
-            <li class="nav-item tab-style">
-              <a href="#" class="nav-link font-weight-bold">Tab Three</a>
+              <router-link to="/resume/experience" class="nav-link active font-weight-bold"
+                >Experience</router-link
+              >
             </li>
           </ul>
           <div class="tab-content">
@@ -82,12 +98,6 @@ export default {
               </div>
 
               <div class="col-md-4">
-                <label class="form-label">Address <span class="required-mask">*</span></label>
-                <input v-model="form.last_name" type="text" class="form-control" />
-                <div v-if="v$.last_name.$error" class="text-danger">Address required</div>
-              </div>
-
-              <div class="col-md-4">
                 <label class="form-label">Start Date <span class="required-mask">*</span></label>
                 <input v-model="form.dob" type="date" class="form-control" />
                 <div v-if="v$.dob.$error" class="text-danger">Start date required</div>
@@ -95,30 +105,86 @@ export default {
 
               <div class="col-md-4">
                 <label class="form-label">End Date <span class="required-mask">*</span></label>
-                <input v-model="form.dob" type="date" class="form-control" />
-                <div v-if="v$.dob.$error" class="text-danger">End date required</div>
+                <input v-model="form.end_date" type="date" class="form-control" />
+                <div v-if="v$.end_date.$error" class="text-danger">End date required</div>
+              </div>
+              <div class="col-md-12">
+                <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#aiModal">
+                  <i class="bi bi-cpu"></i> Ask AI for Assistance
+                </a>
               </div>
 
               <div class="col-md-12">
-                <button class="btn btn-danger">
-                  <i class="bi bi-cpu"></i> Ask AI for Assistance
-                </button>
-              </div>
-              <div class="col-md-4">
                 <label class="form-label"
                   >Responsibilities <span class="required-mask">*</span></label
                 >
-                <textarea v-model="form.phone" type="text" class="form-control" />
-                <div v-if="v$.phone.$error" class="text-danger">
-                  Phone must be at least 10 digits
+                <QuillEditor
+                  v-model="form.responsibilities"
+                  theme="snow"
+                  :toolbar="[
+                    ['bold', 'italic', 'underline'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    ['link'],
+                  ]"
+                  style="height: 250px; background: white"
+                />
+                <div v-if="v$.responsibilities.$error" class="text-danger">
+                  Responsibilities required
                 </div>
               </div>
 
               <div class="col-md-4">
-                <label class="form-label">&nbsp;</label>
                 <button type="submit" class="btn btn-primary">Submit</button>
               </div>
             </form>
+
+            <!-- Ask AI Modal -->
+            <div
+              class="modal fade"
+              id="aiModal"
+              tabindex="-1"
+              aria-labelledby="aiModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="aiModalLabel">AI Assistance</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>How can I help you? Ask me anything related to your responsibilities.</p>
+                    <textarea
+                      class="form-control"
+                      rows="5"
+                      placeholder="Type your question..."
+                    ></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" :disabled="isLoading">
+                      Close
+                    </button>
+
+                    <!-- Ask Button -->
+                    <button class="btn btn-primary" @click="askAI" :disabled="isLoading">
+                      <span
+                        v-if="isLoading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      <span v-if="!isLoading">Ask</span>
+                      <span v-else class="ms-2">Waiting...</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
