@@ -4,12 +4,17 @@ import useVuelidate from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import draggable from 'vuedraggable'
+import { useToast } from 'vue-toast-notification'
 
 export default {
   components: {
     SideBar,
+    draggable,
   },
   setup() {
+    const toast = useToast()
+
     const form = ref({
       job_title: '',
       start_date: '',
@@ -20,30 +25,53 @@ export default {
     const currentlyWorking = ref(false)
     const aiQuestion = ref('')
     const isLoading = ref(false)
+    const editingIndex = ref(null)
+
+    const editForm = ref({ job_title: '', start_date: '', end_date: '', responsibilities: '' })
+    const editCurrentlyWorking = ref(false)
+
     const experiences = ref([
       {
         job_title: 'Software Developer',
         start_date: '2022-01-01',
         end_date: '2023-12-31',
-        responsibilities: 'Developed web applications and managed backend services.',
+        responsibilities: 'Developed web applications.',
         currentlyWorking: false,
       },
       {
         job_title: 'Frontend Developer',
         start_date: '2021-05-01',
         end_date: '2022-01-01',
-        responsibilities: 'Built responsive UI components and collaborated with UX team.',
+        responsibilities: 'Built UI components.',
         currentlyWorking: false,
       },
       {
-        job_title: 'Junior Developer',
-        start_date: '2020-06-01',
-        end_date: '',
-        responsibilities: 'Assisted in coding, debugging, and testing various projects.',
-        currentlyWorking: true,
+        job_title: 'Frontend Developer 3',
+        start_date: '2021-05-01',
+        end_date: '2022-01-01',
+        responsibilities: 'Built UI components.',
+        currentlyWorking: false,
       },
     ])
-    const editingIndex = ref(null) // To track if we're editing
+
+    const sortKey = ref('')
+    const sortOrder = ref('asc')
+
+    const sortBy = (key) => {
+      if (sortKey.value === key) {
+        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+      } else {
+        sortKey.value = key
+        sortOrder.value = 'asc'
+      }
+      experiences.value.sort((a, b) => {
+        let valA = (a[key] || '').toString().toLowerCase()
+        let valB = (b[key] || '').toString().toLowerCase()
+        if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
+        if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
+        return 0
+      })
+    }
 
     const rules = computed(() => ({
       job_title: { required },
@@ -51,59 +79,51 @@ export default {
       end_date: currentlyWorking.value ? {} : { required },
       responsibilities: { required },
     }))
-
     const v$ = useVuelidate(rules, form)
 
     const submitForm = async () => {
       const isValid = await v$.value.$validate()
       if (!isValid) return
-
-      const experience = { ...form.value, currentlyWorking: currentlyWorking.value }
-
-      if (editingIndex.value !== null) {
-        experiences.value[editingIndex.value] = experience
-        editingIndex.value = null
-      } else {
-        experiences.value.push(experience)
-      }
-
-      alert('Experience saved!')
+      experiences.value.push({ ...form.value, currentlyWorking: currentlyWorking.value })
+      toast.success('Experience saved!')
       resetForm()
+    }
+
+    const resetForm = () => {
+      form.value = { job_title: '', start_date: '', end_date: '', responsibilities: '' }
+      currentlyWorking.value = false
+      editingIndex.value = null
+      v$.value.$reset()
+    }
+
+    const deleteExperience = (index) => {
+      if (confirm('Are you sure?')) {
+        experiences.value.splice(index, 1)
+        toast.success('Deleted!')
+      }
     }
 
     const editExperience = (index) => {
       const exp = experiences.value[index]
-      form.value = { ...exp }
-      currentlyWorking.value = exp.currentlyWorking
+      editForm.value = { ...exp }
+      editCurrentlyWorking.value = exp.currentlyWorking
       editingIndex.value = index
+      new bootstrap.Modal(document.getElementById('editExperienceModal')).show()
     }
 
-    const deleteExperience = (index) => {
-      if (confirm('Are you sure you want to delete this experience?')) {
-        experiences.value.splice(index, 1)
-        resetForm()
+    const updateExperience = () => {
+      if (editingIndex.value === null) return
+      experiences.value[editingIndex.value] = {
+        ...editForm.value,
+        currentlyWorking: editCurrentlyWorking.value,
       }
-    }
-
-    const resetForm = () => {
-      form.value = {
-        job_title: '',
-        start_date: '',
-        end_date: '',
-        responsibilities: '',
-      }
-      currentlyWorking.value = false
-      v$.value.$reset()
+      bootstrap.Modal.getInstance(document.getElementById('editExperienceModal')).hide()
+      toast.success('Updated!')
     }
 
     const askAI = async () => {
-      if (!aiQuestion.value.trim()) {
-        alert('Please enter a question.')
-        return
-      }
-
+      if (!aiQuestion.value.trim()) return alert('Enter a question')
       isLoading.value = true
-
       try {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
@@ -128,14 +148,11 @@ export default {
             },
           },
         )
-
-        const reply = response.data.choices[0].message.content
-        form.value.responsibilities = reply
+        form.value.responsibilities = response.data.choices[0].message.content
         aiQuestion.value = ''
-        alert('AI Response:\n' + reply)
+        toast.success('AI generated responsibility!')
       } catch (error) {
-        console.error(error)
-        alert(error)
+        toast.error('Failed to get AI response.')
       } finally {
         isLoading.value = false
       }
@@ -150,12 +167,20 @@ export default {
       currentlyWorking,
       aiQuestion,
       experiences,
-      editExperience,
       deleteExperience,
+      editExperience,
+      editingIndex,
+      editForm,
+      editCurrentlyWorking,
+      updateExperience,
+      sortKey,
+      sortOrder,
+      sortBy,
     }
   },
 }
 </script>
+
 <template>
   <SideBar />
   <main id="main" class="main">
@@ -304,41 +329,135 @@ export default {
 
             <!-- Experience List -->
             <div class="col-md-12 mt-4">
-              <table class="table table-bordered table-hover table-sm">
+              <table class="table table-bordered table-sm">
                 <thead>
                   <tr>
-                    <th colspan="5">My Experiences</th>
-                  </tr>
-                  <tr>
-                    <th>Job Title</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
+                    <th @click="sortBy('job_title')" style="cursor: pointer">
+                      Job Title
+                      <i
+                        v-if="sortKey === 'job_title'"
+                        :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
+                      ></i>
+                    </th>
+                    <th @click="sortBy('start_date')" style="cursor: pointer">
+                      Start Date
+                      <i
+                        v-if="sortKey === 'start_date'"
+                        :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
+                      ></i>
+                    </th>
+                    <th @click="sortBy('end_date')" style="cursor: pointer">
+                      End Date
+                      <i
+                        v-if="sortKey === 'end_date'"
+                        :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
+                      ></i>
+                    </th>
                     <th>Responsibilities</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr v-for="(exp, index) in experiences" :key="index">
-                    <td>{{ exp.job_title }}</td>
-                    <td>{{ exp.start_date }}</td>
-                    <td>{{ exp.currentlyWorking ? 'Currently Working' : exp.end_date }}</td>
-                    <td>{{ exp.responsibilities }}</td>
-                    <td>
-                      <a href="#" @click="editExperience(index)">
-                        <i class="bi bi-pencil"></i> Edit
-                      </a>
-                      <button class="btn btn-sm btn-danger" @click="deleteExperience(index)">
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                  <tr v-if="experiences.length === 0">
-                    <td colspan="5">No experience added yet.</td>
-                  </tr>
-                </tbody>
+                <draggable v-model="experiences" tag="tbody" item-key="job_title" handle=".handle">
+                  <template #item="{ element, index }">
+                    <tr>
+                      <td class="handle" style="cursor: move">
+                        {{ element.job_title }}
+                      </td>
+                      <td>{{ element.start_date }}</td>
+                      <td>
+                        {{ element.currentlyWorking ? 'Currently Working' : element.end_date }}
+                      </td>
+                      <td>{{ element.responsibilities }}</td>
+                      <td>
+                        <button class="btn btn-sm btn-warning me-1" @click="editExperience(index)">
+                          Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" @click="deleteExperience(index)">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </template>
+                </draggable>
               </table>
             </div>
             <!-- End Experience List -->
+
+            <!-- Edit Experience Modal -->
+            <div
+              class="modal fade"
+              id="editExperienceModal"
+              tabindex="-1"
+              aria-labelledby="editExperienceModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <form @submit.prevent="updateExperience">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="editExperienceModalLabel">Edit Experience</h5>
+                      <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                      />
+                    </div>
+                    <div class="modal-body row g-3">
+                      <div class="col-md-4">
+                        <label class="form-label">Job Title</label>
+                        <input v-model="editForm.job_title" type="text" class="form-control" />
+                      </div>
+
+                      <div class="col-md-4">
+                        <label class="form-label">Start Date</label>
+                        <input v-model="editForm.start_date" type="date" class="form-control" />
+                      </div>
+
+                      <div class="col-md-4">
+                        <label class="form-label">End Date</label>
+                        <input
+                          v-model="editForm.end_date"
+                          type="date"
+                          class="form-control"
+                          :disabled="editCurrentlyWorking"
+                        />
+                        <div class="form-check mt-2">
+                          <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="editCurrentlyWorking"
+                            v-model="editCurrentlyWorking"
+                            @change="
+                              editForm.end_date = editCurrentlyWorking ? '' : editForm.end_date
+                            "
+                          />
+                          <label class="form-check-label" for="editCurrentlyWorking">
+                            <small>Currently Working</small>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="col-md-12">
+                        <label class="form-label">Responsibilities</label>
+                        <textarea
+                          v-model="editForm.responsibilities"
+                          class="form-control"
+                          rows="5"
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                      </button>
+                      <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- End Edit Experience Modal -->
           </div>
         </div>
       </div>
