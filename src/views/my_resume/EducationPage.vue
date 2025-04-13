@@ -17,7 +17,6 @@ export default {
 
     const form = ref({
       job_title: '',
-      company_name: '',
       start_date: '',
       end_date: '',
       responsibilities: '',
@@ -30,7 +29,6 @@ export default {
 
     const editForm = ref({
       job_title: '',
-      company_name: '',
       start_date: '',
       end_date: '',
       responsibilities: '',
@@ -42,6 +40,7 @@ export default {
     const sortKey = ref('')
     const sortOrder = ref('asc')
 
+    // Fetch experiences from API
     const fetchExperiences = async () => {
       try {
         const res = await axios.get('/api/experiences')
@@ -57,7 +56,6 @@ export default {
 
     const rules = computed(() => ({
       job_title: { required },
-      company_name: { required },
       start_date: { required },
       end_date: currentlyWorking.value ? {} : { required },
       responsibilities: { required },
@@ -65,34 +63,21 @@ export default {
     const v$ = useVuelidate(rules, form)
 
     const submitForm = async () => {
-      // Validate form before submitting
       const isValid = await v$.value.$validate()
-      if (!isValid) {
-        toast.error('Please fill out the form correctly.')
-        return // Prevent submission if validation fails
-      }
+      if (!isValid) return
 
       try {
         const payload = {
           ...form.value,
-          end_date: currentlyWorking.value ? null : form.value.end_date, // Handle end_date based on currentlyWorking flag
+          end_date: currentlyWorking.value ? null : form.value.end_date,
           currentlyWorking: currentlyWorking.value,
         }
 
-        const response = await axios.post(
-          'http://localhost/resume-builder/api/experiences',
-          payload,
-        )
-
-        if (response.data.status === 'success') {
-          toast.success('Experience saved!')
-          fetchExperiences()
-          resetForm()
-        } else {
-          toast.error(response.data + 'Asib')
-        }
+        await axios.post('/api/experiences', payload)
+        toast.success('Experience saved!')
+        fetchExperiences()
+        resetForm()
       } catch (error) {
-        console.error(error)
         toast.error('Failed to save experience.')
       }
     }
@@ -100,7 +85,6 @@ export default {
     const resetForm = () => {
       form.value = {
         job_title: '',
-        company_name: '',
         start_date: '',
         end_date: '',
         responsibilities: '',
@@ -121,13 +105,12 @@ export default {
       }
     }
 
-    const editExperience = (experience) => {
-      editForm.value = { ...experience }
-      editCurrentlyWorking.value = experience.currentlyWorking
-      editingIndex.value = experience.id
-      window.bootstrap.Modal.getOrCreateInstance(
-        document.getElementById('editExperienceModal'),
-      ).show()
+    const editExperience = (index, id) => {
+      const exp = experiences.value[index]
+      editForm.value = { ...exp }
+      editCurrentlyWorking.value = exp.currentlyWorking
+      editingIndex.value = id
+      new bootstrap.Modal(document.getElementById('editExperienceModal')).show()
     }
 
     const updateExperience = async () => {
@@ -141,7 +124,7 @@ export default {
         }
 
         await axios.put(`/api/experiences/${editingIndex.value}`, payload)
-        window.bootstrap.Modal.getInstance(document.getElementById('editExperienceModal')).hide()
+        bootstrap.Modal.getInstance(document.getElementById('editExperienceModal')).hide()
         toast.success('Experience updated successfully!')
         fetchExperiences()
       } catch (error) {
@@ -257,14 +240,7 @@ export default {
                 <label class="form-label">Job Title <span class="required-mask">*</span></label>
                 <input v-model="form.job_title" type="text" class="form-control" />
                 <div v-if="v$.job_title.$dirty && v$.job_title.$error" class="text-danger">
-                  Job title required
-                </div>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Company Name <span class="required-mask">*</span></label>
-                <input v-model="form.company_name" type="text" class="form-control" />
-                <div v-if="v$.company_name.$dirty && v$.company_name.$error" class="text-danger">
-                  Company name required
+                  Job Title required
                 </div>
               </div>
 
@@ -390,13 +366,6 @@ export default {
                         :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
                       ></i>
                     </th>
-                    <th @click="sortBy('company_name')" style="cursor: pointer">
-                      Company Name
-                      <i
-                        v-if="sortKey === 'company_name'"
-                        :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
-                      ></i>
-                    </th>
                     <th @click="sortBy('start_date')" style="cursor: pointer">
                       Start Date
                       <i
@@ -415,44 +384,28 @@ export default {
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody v-if="Array.isArray(experiences) && experiences.length > 0">
-                  <draggable
-                    v-model="experiences"
-                    tag="template"
-                    item-key="job_title"
-                    handle=".handle"
-                  >
-                    <template #item="{ element, index }">
-                      <tr>
-                        <td class="handle" style="cursor: move">
-                          {{ element.job_title }}
-                        </td>
-                        <td>{{ element.company_name }}</td>
-                        <td>{{ element.start_date }}</td>
-                        <td>
-                          {{ element.currentlyWorking ? 'Currently Working' : element.end_date }}
-                        </td>
-                        <td>{{ element.responsibilities }}</td>
-                        <td>
-                          <button
-                            class="btn btn-sm btn-warning me-1"
-                            @click="editExperience(index)"
-                          >
-                            Edit
-                          </button>
-                          <button class="btn btn-sm btn-danger" @click="deleteExperience(index)">
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    </template>
-                  </draggable>
-                </tbody>
-                <tbody v-else>
-                  <tr>
-                    <td colspan="5" class="maroon">No record found.</td>
-                  </tr>
-                </tbody>
+                <draggable v-model="experiences" tag="tbody" item-key="job_title" handle=".handle">
+                  <template #item="{ element, index }">
+                    <tr>
+                      <td class="handle" style="cursor: move">
+                        {{ element.job_title }}
+                      </td>
+                      <td>{{ element.start_date }}</td>
+                      <td>
+                        {{ element.currentlyWorking ? 'Currently Working' : element.end_date }}
+                      </td>
+                      <td>{{ element.responsibilities }}</td>
+                      <td>
+                        <button class="btn btn-sm btn-warning me-1" @click="editExperience(index)">
+                          Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" @click="deleteExperience(index)">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </template>
+                </draggable>
               </table>
             </div>
             <!-- End Experience List -->
@@ -481,10 +434,6 @@ export default {
                       <div class="col-md-4">
                         <label class="form-label">Job Title</label>
                         <input v-model="editForm.job_title" type="text" class="form-control" />
-                      </div>
-                      <div class="col-md-4">
-                        <label class="form-label">Company Name</label>
-                        <input v-model="editForm.company_name" type="text" class="form-control" />
                       </div>
 
                       <div class="col-md-4">
