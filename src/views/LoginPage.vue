@@ -9,38 +9,33 @@ export default {
   setup() {
     const router = useRouter()
 
-    // Form Data
     const form = ref({
       email: '',
       password: '',
     })
 
-    // Validation Rules
     const rules = {
       email: { required, email },
       password: { required },
     }
 
-    // Vuelidate Instance
     const v$ = useVuelidate(rules, form)
 
-    // Error Message
     const errorMessage = ref(null)
 
-    // Form Submission
     const submitForm = async () => {
-      v$.value.$validate() // Trigger validation
-      if (v$.value.$error) return // Stop if validation fails
+      v$.value.$validate()
+      if (v$.value.$error) return
 
       try {
-        const response = await axios.post('http://localhost/resume-builder/api/login', {
+        const response = await axios.post('http://127.0.0.1:8000/api/login', {
           email: form.value.email,
           password: form.value.password,
         })
 
-        localStorage.setItem('token', response.data.token) // Store JWT token
-        errorMessage.value = null // Clear errors
-        router.push('/dashboard') // Redirect on success
+        localStorage.setItem('token', response.data.token)
+        errorMessage.value = null
+        router.push('/dashboard')
       } catch (error) {
         alert(error)
         errorMessage.value = error.response?.data?.error || 'Login failed'

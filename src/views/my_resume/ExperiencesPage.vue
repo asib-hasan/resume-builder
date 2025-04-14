@@ -44,10 +44,27 @@ export default {
 
     const fetchExperiences = async () => {
       try {
-        const res = await axios.get('/api/experiences')
-        experiences.value = res.data
+        const token = localStorage.getItem('token')
+
+        const res = await axios.get('http://127.0.0.1:8000/api/experiences', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (res.status === 200) {
+          var temp_data = res.data
+          // Check if temp_data['data'] is an array, if not convert it
+          experiences.value = Array.isArray(temp_data['data'])
+            ? temp_data['data']
+            : [temp_data['data']]
+
+          console.log('Experiences:', experiences.value)
+        } else {
+          console.error('Failed to load experiences.')
+        }
       } catch (error) {
-        toast.error('Failed to load experiences.')
+        console.error('Error loading experiences:', error)
       }
     }
 
@@ -75,25 +92,35 @@ export default {
       try {
         const payload = {
           ...form.value,
-          end_date: currentlyWorking.value ? null : form.value.end_date, // Handle end_date based on currentlyWorking flag
+          end_date: currentlyWorking.value ? null : form.value.end_date,
           currentlyWorking: currentlyWorking.value,
         }
 
-        const response = await axios.post(
-          'http://localhost/resume-builder/api/experiences',
-          payload,
-        )
+        const token = localStorage.getItem('token')
 
-        if (response.data.status === 'success') {
+        const response = await axios.post('http://127.0.0.1:8000/api/experiences', payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.status === 201) {
           toast.success('Experience saved!')
           fetchExperiences()
           resetForm()
         } else {
-          toast.error(response.data + 'Asib')
+          toast.error('Failed to save experience.')
         }
       } catch (error) {
-        console.error(error)
-        toast.error('Failed to save experience.')
+        if (error.response && error.response.status === 422) {
+          const errors = error.response.data.errors
+          for (const key in errors) {
+            toast.error(errors[key][0])
+          }
+        } else {
+          toast.error('Server error occurred.')
+          console.error(error)
+        }
       }
     }
 
@@ -415,32 +442,33 @@ export default {
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody v-if="Array.isArray(experiences) && experiences.length > 0">
-                  <draggable
-                    v-model="experiences"
-                    tag="template"
-                    item-key="job_title"
-                    handle=".handle"
-                  >
+
+                <tbody v-if="experiences && experiences.length > 0">
+                  <draggable v-model="experiences" tag="tbody" item-key="id" @end="onSortEnd">
                     <template #item="{ element, index }">
                       <tr>
-                        <td class="handle" style="cursor: move">
-                          {{ element.job_title }}
-                        </td>
+                        <td>{{ element.job_title }}</td>
                         <td>{{ element.company_name }}</td>
-                        <td>{{ element.start_date }}</td>
+                        <td>{{ new Date(element.start_date).toLocaleDateString() }}</td>
                         <td>
-                          {{ element.currentlyWorking ? 'Currently Working' : element.end_date }}
+                          {{
+                            element.currentlyWorking
+                              ? 'Currently Working'
+                              : new Date(element.end_date).toLocaleDateString()
+                          }}
                         </td>
                         <td>{{ element.responsibilities }}</td>
                         <td>
                           <button
                             class="btn btn-sm btn-warning me-1"
-                            @click="editExperience(index)"
+                            @click="editExperience(element.id)"
                           >
                             Edit
                           </button>
-                          <button class="btn btn-sm btn-danger" @click="deleteExperience(index)">
+                          <button
+                            class="btn btn-sm btn-danger"
+                            @click="deleteExperience(element.id)"
+                          >
                             Delete
                           </button>
                         </td>
@@ -448,9 +476,10 @@ export default {
                     </template>
                   </draggable>
                 </tbody>
+
                 <tbody v-else>
                   <tr>
-                    <td colspan="5" class="maroon">No record found.</td>
+                    <td colspan="6" class="text-center">No record found.</td>
                   </tr>
                 </tbody>
               </table>
