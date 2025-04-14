@@ -277,7 +277,7 @@ export default {
         try {
           const response = await axios.post(
             'http://127.0.0.1:8000/api/update/experience/order',
-            updatedExperiences,
+            { experiences: updatedExperiences },
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -345,6 +345,11 @@ export default {
             <li class="nav-item">
               <router-link to="/resume/experience" class="nav-link active font-weight-bold"
                 >Experience</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/education" class="nav-link font-weight-bold"
+                >Education</router-link
               >
             </li>
           </ul>

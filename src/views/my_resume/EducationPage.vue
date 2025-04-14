@@ -13,159 +13,129 @@ export default {
     draggable,
   },
   setup() {
+    const token = localStorage.getItem('token')
     const toast = useToast()
 
     const form = ref({
-      job_title: '',
+      institute: '',
+      city: '',
+      degree: '',
+      field_of_study: '',
       start_date: '',
       end_date: '',
-      responsibilities: '',
     })
 
-    const currentlyWorking = ref(false)
-    const aiQuestion = ref('')
-    const isLoading = ref(false)
     const editingIndex = ref(null)
-
     const editForm = ref({
-      job_title: '',
+      institute: '',
+      city: '',
+      degree: '',
+      field_of_study: '',
       start_date: '',
       end_date: '',
-      responsibilities: '',
     })
-    const editCurrentlyWorking = ref(false)
 
-    const experiences = ref([])
-
+    const educations = ref([])
     const sortKey = ref('')
     const sortOrder = ref('asc')
 
-    // Fetch experiences from API
-    const fetchExperiences = async () => {
+    const fetchEducations = async () => {
       try {
-        const res = await axios.get('/api/experiences')
-        experiences.value = res.data
+        const res = await axios.get('http://127.0.0.1:8000/api/educations', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (res.status === 200) {
+          educations.value = Array.isArray(res.data.data) ? res.data.data : [res.data.data]
+        }
       } catch (error) {
-        toast.error('Failed to load experiences.')
+        toast.error('Error loading education records.')
       }
     }
 
-    onMounted(() => {
-      fetchExperiences()
-    })
+    onMounted(fetchEducations)
 
     const rules = computed(() => ({
-      job_title: { required },
+      institute: { required },
+      city: { required },
+      degree: { required },
+      field_of_study: { required },
       start_date: { required },
-      end_date: currentlyWorking.value ? {} : { required },
-      responsibilities: { required },
+      end_date: { required },
     }))
     const v$ = useVuelidate(rules, form)
 
     const submitForm = async () => {
       const isValid = await v$.value.$validate()
-      if (!isValid) return
+      if (!isValid) {
+        toast.error('Please fill all fields.')
+        return
+      }
 
       try {
-        const payload = {
-          ...form.value,
-          end_date: currentlyWorking.value ? null : form.value.end_date,
-          currentlyWorking: currentlyWorking.value,
+        const response = await axios.post('http://127.0.0.1:8000/api/educations', form.value, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (response.status === 201) {
+          toast.success('Education saved!')
+          fetchEducations()
+          resetForm()
         }
-
-        await axios.post('/api/experiences', payload)
-        toast.success('Experience saved!')
-        fetchExperiences()
-        resetForm()
       } catch (error) {
-        toast.error('Failed to save experience.')
+        console.error(error)
+        toast.error('Failed to save education.')
       }
     }
 
     const resetForm = () => {
       form.value = {
-        job_title: '',
+        institute: '',
+        city: '',
+        degree: '',
+        field_of_study: '',
         start_date: '',
         end_date: '',
-        responsibilities: '',
       }
-      currentlyWorking.value = false
-      editingIndex.value = null
       v$.value.$reset()
     }
 
-    const deleteExperience = async (id) => {
+    const deleteEducation = async (id) => {
       if (!confirm('Are you sure?')) return
       try {
-        await axios.delete(`/api/experiences/${id}`)
-        toast.success('Deleted!')
-        fetchExperiences()
+        await axios.delete(`http://127.0.0.1:8000/api/educations/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        toast.success('Education deleted.')
+        fetchEducations()
       } catch (error) {
-        toast.error('Failed to delete.')
+        toast.error('Error deleting education.')
       }
     }
 
-    const editExperience = (index, id) => {
-      const exp = experiences.value[index]
-      editForm.value = { ...exp }
-      editCurrentlyWorking.value = exp.currentlyWorking
-      editingIndex.value = id
-      new bootstrap.Modal(document.getElementById('editExperienceModal')).show()
+    const editEducation = (education) => {
+      editForm.value = { ...education }
+      editingIndex.value = education.id
+      window.bootstrap.Modal.getOrCreateInstance(
+        document.getElementById('editEducationModal'),
+      ).show()
     }
 
-    const updateExperience = async () => {
+    const updateEducation = async () => {
       if (editingIndex.value === null) return
-
       try {
-        const payload = {
-          ...editForm.value,
-          end_date: editCurrentlyWorking.value ? null : editForm.value.end_date,
-          currentlyWorking: editCurrentlyWorking.value,
-        }
-
-        await axios.put(`/api/experiences/${editingIndex.value}`, payload)
-        bootstrap.Modal.getInstance(document.getElementById('editExperienceModal')).hide()
-        toast.success('Experience updated successfully!')
-        fetchExperiences()
-      } catch (error) {
-        toast.error('Failed to update experience.')
-      }
-    }
-
-    const askAI = async () => {
-      if (!aiQuestion.value.trim()) return alert('Enter a question')
-      isLoading.value = true
-      try {
-        const response = await axios.post(
-          'https://api.openai.com/v1/chat/completions',
+        const response = await axios.put(
+          `http://127.0.0.1:8000/api/educations/${editingIndex.value}`,
+          editForm.value,
           {
-            model: 'gpt-3.5-turbo',
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are a helpful assistant that writes professional resume responsibilities.',
-              },
-              {
-                role: 'user',
-                content: aiQuestion.value,
-              },
-            ],
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           },
         )
-        form.value.responsibilities = response.data.choices[0].message.content
-        aiQuestion.value = ''
-        toast.success('AI generated responsibility!')
+        if (response.status === 200) {
+          toast.success('Education updated!')
+          fetchEducations()
+          window.bootstrap.Modal.getInstance(document.getElementById('editEducationModal')).hide()
+        }
       } catch (error) {
-        toast.error('Failed to get AI response.')
-      } finally {
-        isLoading.value = false
+        toast.error('Error updating education.')
       }
     }
 
@@ -176,7 +146,8 @@ export default {
         sortKey.value = key
         sortOrder.value = 'asc'
       }
-      experiences.value.sort((a, b) => {
+
+      educations.value.sort((a, b) => {
         let valA = (a[key] || '').toString().toLowerCase()
         let valB = (b[key] || '').toString().toLowerCase()
         if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
@@ -185,29 +156,43 @@ export default {
       })
     }
 
+    const onSortEnd = async () => {
+      try {
+        const updated = educations.value.map((edu, index) => ({
+          ...edu,
+          sort_order: index + 1,
+        }))
+
+        const res = await axios.post(
+          'http://127.0.0.1:8000/api/update/education/order',
+          { educations: updated },
+          { headers: { Authorization: `Bearer ${token}` } },
+        )
+
+        if (res.status === 200) toast.success('Sort order updated!')
+      } catch (error) {
+        toast.error('Sort update failed.')
+      }
+    }
+
     return {
       form,
       v$,
       submitForm,
-      askAI,
-      isLoading,
-      currentlyWorking,
-      aiQuestion,
-      experiences,
-      deleteExperience,
-      editExperience,
-      editingIndex,
+      educations,
+      deleteEducation,
+      editEducation,
       editForm,
-      editCurrentlyWorking,
-      updateExperience,
+      editingIndex,
+      updateEducation,
       sortKey,
       sortOrder,
       sortBy,
+      onSortEnd,
     }
   },
 }
 </script>
-
 <template>
   <SideBar />
   <main id="main" class="main">
@@ -227,9 +212,14 @@ export default {
                 >Personal</router-link
               >
             </li>
-            <li class="nav-item">
-              <router-link to="/resume/experience" class="nav-link active font-weight-bold"
+            <li class="nav-item tab-style">
+              <router-link to="/resume/experience" class="nav-link font-weight-bold"
                 >Experience</router-link
+              >
+            </li>
+            <li class="nav-item">
+              <router-link to="/resume/education" class="nav-link active font-weight-bold"
+                >Education</router-link
               >
             </li>
           </ul>
@@ -237,11 +227,30 @@ export default {
           <div class="tab-content">
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-4">
-                <label class="form-label">Job Title <span class="required-mask">*</span></label>
-                <input v-model="form.job_title" type="text" class="form-control" />
-                <div v-if="v$.job_title.$dirty && v$.job_title.$error" class="text-danger">
-                  Job Title required
+                <label class="form-label">Institute <span class="required-mask">*</span></label>
+                <input v-model="form.institute" type="text" class="form-control" />
+                <div v-if="v$.institute.$dirty && v$.institute.$error" class="text-danger">
+                  Institute required
                 </div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">City <span class="required-mask">*</span></label>
+                <input v-model="form.city" type="text" class="form-control" />
+                <div v-if="v$.city.$dirty && v$.city.$error" class="text-danger">City required</div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Degree <span class="required-mask">*</span></label>
+                <input v-model="form.degree" type="text" class="form-control" />
+                <div v-if="v$.degree.$dirty && v$.degree.$error" class="text-danger">
+                  Degree required
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Field of Study</label>
+                <input v-model="form.field_of_study" type="text" class="form-control" />
               </div>
 
               <div class="col-md-4">
@@ -254,50 +263,9 @@ export default {
 
               <div class="col-md-4">
                 <label class="form-label">End Date <span class="required-mask">*</span></label>
-                <input
-                  v-model="form.end_date"
-                  type="date"
-                  class="form-control"
-                  :disabled="currentlyWorking"
-                />
-                <div class="form-check mt-2">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    id="currentlyWorking"
-                    v-model="currentlyWorking"
-                    @change="form.end_date = currentlyWorking ? '' : form.end_date"
-                  />
-                  <label class="form-check-label" for="currentlyWorking">
-                    <small>Currently Working</small>
-                  </label>
-                </div>
+                <input v-model="form.end_date" type="date" class="form-control" />
                 <div v-if="v$.end_date?.$dirty && v$.end_date?.$error" class="text-danger">
                   End date required
-                </div>
-              </div>
-
-              <div class="col-md-12">
-                <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#aiModal">
-                  <i class="bi bi-cpu"></i> Ask AI for Assistance
-                </a>
-              </div>
-
-              <div class="col-md-12">
-                <label class="form-label"
-                  >Responsibilities <span class="required-mask">*</span></label
-                >
-                <textarea
-                  v-model="form.responsibilities"
-                  class="form-control"
-                  rows="5"
-                  placeholder="Describe your responsibilities..."
-                ></textarea>
-                <div
-                  v-if="v$.responsibilities.$dirty && v$.responsibilities.$error"
-                  class="text-danger"
-                >
-                  Responsibilities required
                 </div>
               </div>
 
@@ -306,123 +274,77 @@ export default {
               </div>
             </form>
 
-            <!-- Ask AI Modal -->
-            <div
-              class="modal fade"
-              id="aiModal"
-              tabindex="-1"
-              aria-labelledby="aiModalLabel"
-              aria-hidden="true"
-            >
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="aiModalLabel">AI Assistance</h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    ></button>
-                  </div>
-                  <div class="modal-body">
-                    <p>How can I help you? Ask me anything related to your responsibilities.</p>
-                    <textarea
-                      v-model="aiQuestion"
-                      class="form-control"
-                      rows="4"
-                      placeholder="Type your question..."
-                    ></textarea>
-                  </div>
-                  <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal" :disabled="isLoading">
-                      Close
-                    </button>
-                    <button class="btn btn-primary" @click="askAI" :disabled="isLoading">
-                      <span
-                        v-if="isLoading"
-                        class="spinner-border spinner-border-sm"
-                        role="status"
-                        aria-hidden="true"
-                      ></span>
-                      <span v-if="!isLoading">Ask</span>
-                      <span v-else class="ms-2">Waiting...</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- End Modal -->
-
-            <!-- Experience List -->
+            <!-- Education List -->
             <div class="col-md-12 mt-4">
               <table class="table table-bordered table-sm">
                 <thead>
                   <tr>
-                    <th @click="sortBy('job_title')" style="cursor: pointer">
-                      Job Title
+                    <th @click="sortBy('institute')" style="cursor: pointer">
+                      Institute
                       <i
-                        v-if="sortKey === 'job_title'"
+                        v-if="sortKey === 'institute'"
                         :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
                       ></i>
                     </th>
-                    <th @click="sortBy('start_date')" style="cursor: pointer">
-                      Start Date
-                      <i
-                        v-if="sortKey === 'start_date'"
-                        :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
-                      ></i>
-                    </th>
-                    <th @click="sortBy('end_date')" style="cursor: pointer">
-                      End Date
-                      <i
-                        v-if="sortKey === 'end_date'"
-                        :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
-                      ></i>
-                    </th>
-                    <th>Responsibilities</th>
+                    <th>City</th>
+                    <th>Degree</th>
+                    <th>Field</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <draggable v-model="experiences" tag="tbody" item-key="job_title" handle=".handle">
-                  <template #item="{ element, index }">
+                <draggable
+                  v-if="educations && educations.length > 0"
+                  v-model="educations"
+                  tag="tbody"
+                  item-key="id"
+                  @end="onSortEnd"
+                >
+                  <template #item="{ element }">
                     <tr>
-                      <td class="handle" style="cursor: move">
-                        {{ element.job_title }}
-                      </td>
-                      <td>{{ element.start_date }}</td>
+                      <td>{{ element.institute }}</td>
+                      <td>{{ element.city }}</td>
+                      <td>{{ element.degree }}</td>
+                      <td>{{ element.field_of_study }}</td>
+                      <td>{{ new Date(element.start_date).toLocaleDateString() }}</td>
+                      <td>{{ new Date(element.end_date).toLocaleDateString() }}</td>
                       <td>
-                        {{ element.currentlyWorking ? 'Currently Working' : element.end_date }}
-                      </td>
-                      <td>{{ element.responsibilities }}</td>
-                      <td>
-                        <button class="btn btn-sm btn-warning me-1" @click="editExperience(index)">
+                        <button
+                          class="btn btn-sm btn-info me-1 text-white"
+                          @click="editEducation(element)"
+                        >
                           Edit
                         </button>
-                        <button class="btn btn-sm btn-danger" @click="deleteExperience(index)">
+                        <button class="btn btn-sm btn-danger" @click="deleteEducation(element.id)">
                           Delete
                         </button>
                       </td>
                     </tr>
                   </template>
                 </draggable>
+                <tbody v-else>
+                  <tr>
+                    <td colspan="7">Loading...</td>
+                  </tr>
+                </tbody>
               </table>
             </div>
-            <!-- End Experience List -->
+            <!-- End Education List -->
 
-            <!-- Edit Experience Modal -->
+            <!-- Edit Education Modal -->
             <div
               class="modal fade"
-              id="editExperienceModal"
+              id="editEducationModal"
               tabindex="-1"
-              aria-labelledby="editExperienceModalLabel"
+              aria-labelledby="editEducationModalLabel"
               aria-hidden="true"
             >
               <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                  <form @submit.prevent="updateExperience">
+                  <form @submit.prevent="updateEducation">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="editExperienceModalLabel">Edit Experience</h5>
+                      <h5 class="modal-title" id="editEducationModalLabel">Edit Education</h5>
                       <button
                         type="button"
                         class="btn-close"
@@ -432,46 +354,28 @@ export default {
                     </div>
                     <div class="modal-body row g-3">
                       <div class="col-md-4">
-                        <label class="form-label">Job Title</label>
-                        <input v-model="editForm.job_title" type="text" class="form-control" />
+                        <label class="form-label">Institute</label>
+                        <input v-model="editForm.institute" type="text" class="form-control" />
                       </div>
-
+                      <div class="col-md-4">
+                        <label class="form-label">City</label>
+                        <input v-model="editForm.city" type="text" class="form-control" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">Degree</label>
+                        <input v-model="editForm.degree" type="text" class="form-control" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">Field of Study</label>
+                        <input v-model="editForm.field_of_study" type="text" class="form-control" />
+                      </div>
                       <div class="col-md-4">
                         <label class="form-label">Start Date</label>
                         <input v-model="editForm.start_date" type="date" class="form-control" />
                       </div>
-
                       <div class="col-md-4">
                         <label class="form-label">End Date</label>
-                        <input
-                          v-model="editForm.end_date"
-                          type="date"
-                          class="form-control"
-                          :disabled="editCurrentlyWorking"
-                        />
-                        <div class="form-check mt-2">
-                          <input
-                            class="form-check-input"
-                            type="checkbox"
-                            id="editCurrentlyWorking"
-                            v-model="editCurrentlyWorking"
-                            @change="
-                              editForm.end_date = editCurrentlyWorking ? '' : editForm.end_date
-                            "
-                          />
-                          <label class="form-check-label" for="editCurrentlyWorking">
-                            <small>Currently Working</small>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div class="col-md-12">
-                        <label class="form-label">Responsibilities</label>
-                        <textarea
-                          v-model="editForm.responsibilities"
-                          class="form-control"
-                          rows="5"
-                        ></textarea>
+                        <input v-model="editForm.end_date" type="date" class="form-control" />
                       </div>
                     </div>
                     <div class="modal-footer">
@@ -484,7 +388,7 @@ export default {
                 </div>
               </div>
             </div>
-            <!-- End Edit Experience Modal -->
+            <!-- End Edit Education Modal -->
           </div>
         </div>
       </div>

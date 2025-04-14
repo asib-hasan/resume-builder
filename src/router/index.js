@@ -22,6 +22,12 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/resume/education',
+      name: 'resume-education',
+      component: () => import('../views/my_resume/EducationPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/',
       name: 'login',
       component: () => import('../views/LoginPage.vue'),
