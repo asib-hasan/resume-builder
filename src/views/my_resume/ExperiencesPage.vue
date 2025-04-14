@@ -13,6 +13,7 @@ export default {
     draggable,
   },
   setup() {
+    const token = localStorage.getItem('token')
     const toast = useToast()
 
     const form = ref({
@@ -44,8 +45,6 @@ export default {
 
     const fetchExperiences = async () => {
       try {
-        const token = localStorage.getItem('token')
-
         const res = await axios.get('http://127.0.0.1:8000/api/experiences', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -82,11 +81,10 @@ export default {
     const v$ = useVuelidate(rules, form)
 
     const submitForm = async () => {
-      // Validate form before submitting
       const isValid = await v$.value.$validate()
       if (!isValid) {
         toast.error('Please fill out the form correctly.')
-        return // Prevent submission if validation fails
+        return
       }
 
       try {
@@ -95,8 +93,6 @@ export default {
           end_date: currentlyWorking.value ? null : form.value.end_date,
           currentlyWorking: currentlyWorking.value,
         }
-
-        const token = localStorage.getItem('token')
 
         const response = await axios.post('http://127.0.0.1:8000/api/experiences', payload, {
           headers: {
@@ -140,11 +136,26 @@ export default {
     const deleteExperience = async (id) => {
       if (!confirm('Are you sure?')) return
       try {
-        await axios.delete(`/api/experiences/${id}`)
-        toast.success('Deleted!')
-        fetchExperiences()
+        const response = await axios.delete(`http://127.0.0.1:8000/api/experiences/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.status === 200) {
+          toast.success('Experience deleted successfully!')
+          fetchExperiences()
+        } else {
+          toast.error('Failed to delete experience.')
+        }
       } catch (error) {
-        toast.error('Failed to delete.')
+        // Handle errors
+        if (error.response && error.response.status === 422) {
+          toast.error('Validation error occurred.')
+        } else {
+          toast.error('Server error occurred.')
+          console.error(error)
+        }
       }
     }
 
@@ -167,12 +178,35 @@ export default {
           currentlyWorking: editCurrentlyWorking.value,
         }
 
-        await axios.put(`/api/experiences/${editingIndex.value}`, payload)
-        window.bootstrap.Modal.getInstance(document.getElementById('editExperienceModal')).hide()
-        toast.success('Experience updated successfully!')
-        fetchExperiences()
+        const response = await axios.put(
+          `http://127.0.0.1:8000/api/experiences/${editingIndex.value}`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+
+        if (response.status === 200) {
+          toast.success('Experience updated successfully!')
+          fetchExperiences()
+          window.bootstrap.Modal.getInstance(document.getElementById('editExperienceModal')).hide()
+        } else {
+          toast.error('Failed to update experience.')
+        }
       } catch (error) {
-        toast.error('Failed to update experience.')
+        if (error.response && error.response.status === 422) {
+          const errors = error.response.data.errors
+          for (const key in errors) {
+            toast.error(errors[key][0])
+          }
+        } else if (error.response && error.response.status === 404) {
+          toast.error('Experience not found.')
+        } else {
+          toast.error('Server error occurred.')
+          console.error(error)
+        }
       }
     }
 
@@ -214,12 +248,15 @@ export default {
     }
 
     const sortBy = (key) => {
+      // Toggle sorting order or set to ascending if new key is chosen
       if (sortKey.value === key) {
         sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
       } else {
         sortKey.value = key
         sortOrder.value = 'asc'
       }
+
+      // Sort the experiences based on the selected key and order
       experiences.value.sort((a, b) => {
         let valA = (a[key] || '').toString().toLowerCase()
         let valB = (b[key] || '').toString().toLowerCase()
@@ -227,6 +264,39 @@ export default {
         if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
         return 0
       })
+    }
+
+    // Method to update the sort order in the backend
+    const onSortEnd = async () => {
+      try {
+        const updatedExperiences = experiences.value.map((experience, index) => ({
+          ...experience,
+          sort_order: index + 1,
+        }))
+
+        try {
+          const response = await axios.post(
+            'http://127.0.0.1:8000/api/update/experience/order',
+            updatedExperiences,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          if (response.status == 200) {
+            toast.success('Sort order updated successfully!')
+          } else {
+            toast.error('Failed to update sort order.')
+          }
+        } catch (error) {
+          console.error('Error updating sort order:', error)
+        }
+        toast.success('Sort order updated successfully!')
+      } catch (error) {
+        toast.error('Failed to update sort order.')
+        console.error(error)
+      }
     }
 
     return {
@@ -247,6 +317,7 @@ export default {
       sortKey,
       sortOrder,
       sortBy,
+      onSortEnd,
     }
   },
 }
@@ -443,43 +514,44 @@ export default {
                   </tr>
                 </thead>
 
-                <tbody v-if="experiences && experiences.length > 0">
-                  <draggable v-model="experiences" tag="tbody" item-key="id" @end="onSortEnd">
-                    <template #item="{ element, index }">
-                      <tr>
-                        <td>{{ element.job_title }}</td>
-                        <td>{{ element.company_name }}</td>
-                        <td>{{ new Date(element.start_date).toLocaleDateString() }}</td>
-                        <td>
-                          {{
-                            element.currentlyWorking
-                              ? 'Currently Working'
-                              : new Date(element.end_date).toLocaleDateString()
-                          }}
-                        </td>
-                        <td>{{ element.responsibilities }}</td>
-                        <td>
-                          <button
-                            class="btn btn-sm btn-warning me-1"
-                            @click="editExperience(element.id)"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            class="btn btn-sm btn-danger"
-                            @click="deleteExperience(element.id)"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    </template>
-                  </draggable>
-                </tbody>
+                <draggable
+                  v-if="experiences && experiences.length > 0"
+                  v-model="experiences"
+                  tag="tbody"
+                  item-key="id"
+                  @end="onSortEnd"
+                >
+                  <template #item="{ element }">
+                    <tr>
+                      <td>{{ element.job_title }}</td>
+                      <td>{{ element.company_name }}</td>
+                      <td>{{ new Date(element.start_date).toLocaleDateString() }}</td>
+                      <td>
+                        {{
+                          element.end_date == null
+                            ? 'Currently Working'
+                            : new Date(element.end_date).toLocaleDateString()
+                        }}
+                      </td>
+                      <td>{{ element.responsibilities }}</td>
+                      <td>
+                        <button
+                          class="btn btn-sm btn-info me-1 text-white"
+                          @click="editExperience(element)"
+                        >
+                          Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" @click="deleteExperience(element.id)">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </template>
+                </draggable>
 
                 <tbody v-else>
                   <tr>
-                    <td colspan="6" class="text-center">No record found.</td>
+                    <td colspan="6">Loading...</td>
                   </tr>
                 </tbody>
               </table>
