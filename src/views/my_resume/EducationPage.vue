@@ -23,6 +23,7 @@ export default {
       field_of_study: '',
       start_date: '',
       end_date: '',
+      result: '',
     })
 
     const editingIndex = ref(null)
@@ -33,6 +34,7 @@ export default {
       field_of_study: '',
       start_date: '',
       end_date: '',
+      result: '',
     })
 
     const educations = ref([])
@@ -61,6 +63,7 @@ export default {
       field_of_study: { required },
       start_date: { required },
       end_date: { required },
+      result: { required },
     }))
     const v$ = useVuelidate(rules, form)
 
@@ -94,6 +97,7 @@ export default {
         field_of_study: '',
         start_date: '',
         end_date: '',
+        result: '',
       }
       v$.value.$reset()
     }
@@ -270,6 +274,14 @@ export default {
               </div>
 
               <div class="col-md-4">
+                <label class="form-label">Result <span class="required-mask">*</span></label>
+                <input v-model="form.result" type="text" class="form-control" />
+                <div v-if="v$.result?.$dirty && v$.result?.$error" class="text-danger">
+                  Result required
+                </div>
+              </div>
+
+              <div class="col-md-12">
                 <button type="submit" class="btn btn-primary">Submit</button>
               </div>
             </form>
