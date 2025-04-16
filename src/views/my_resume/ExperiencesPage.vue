@@ -240,7 +240,7 @@ export default {
         form.value.responsibilities = response.data.choices[0].message.content
         aiQuestion.value = ''
         toast.success('AI generated responsibility!')
-      } catch (error) {
+      } catch {
         toast.error('Failed to get AI response.')
       } finally {
         isLoading.value = false
@@ -350,6 +350,11 @@ export default {
             <li class="nav-item tab-style">
               <router-link to="/resume/education" class="nav-link font-weight-bold"
                 >Education</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/skills" class="nav-link font-weight-bold"
+                >Skills</router-link
               >
             </li>
           </ul>

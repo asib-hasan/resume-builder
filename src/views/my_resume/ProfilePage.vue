@@ -4,10 +4,15 @@ import useVuelidate from '@vuelidate/core'
 import { required, email, minLength, numeric } from '@vuelidate/validators'
 import { ref } from 'vue'
 
+// TinyMCE
+import Editor from '@tinymce/tinymce-vue'
+
 export default {
-  components: { SideBar },
+  components: {
+    SideBar,
+    Editor,
+  },
   setup() {
-    // Form Data
     const form = ref({
       first_name: '',
       last_name: '',
@@ -18,9 +23,9 @@ export default {
       address: '',
       phone: '',
       email: '',
+      summary: '',
     })
 
-    // Validation Rules
     const rules = {
       first_name: { required },
       last_name: { required },
@@ -31,17 +36,16 @@ export default {
       address: { required },
       phone: { required, numeric, minLength: minLength(10) },
       email: { required, email },
+      summary: { required },
     }
 
-    // Vuelidate Instance
     const v$ = useVuelidate(rules, form)
 
-    // Form Submission
     const submitForm = () => {
-      v$.value.$validate() // Trigger validation
+      v$.value.$validate()
       if (!v$.value.$error) {
         alert('Form submitted successfully!')
-        // Proceed with form submission logic
+        console.log(form.value)
       }
     }
 
@@ -59,6 +63,7 @@ export default {
         <li class="breadcrumb-item"><a href="">My Resume</a></li>
       </ol>
     </div>
+
     <section class="dashboard">
       <div class="row">
         <div class="col-md-12">
@@ -71,7 +76,18 @@ export default {
                 >Experience</router-link
               >
             </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/education" class="nav-link font-weight-bold"
+                >Education</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/skills" class="nav-link font-weight-bold"
+                >Skills</router-link
+              >
+            </li>
           </ul>
+
           <div class="tab-content">
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-4">
@@ -148,9 +164,24 @@ export default {
                 <div v-if="v$.email.$error" class="text-danger">Valid email is required</div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-12">
+                <label class="form-label">Summary <span class="required-mask">*</span></label>
+                <Editor
+                  v-model="form.summary"
+                  api-key="cl1h71mod7y80bq4lsbz1rded087irddzyuhmqq56cj1ehb7"
+                  :init="{
+                    height: 300,
+                    menubar: false,
+                    plugins: 'lists link  preview',
+                    toolbar: 'undo redo | bold italic | bullist numlist  | preview',
+                  }"
+                />
+                <div v-if="v$.summary.$error" class="text-danger mt-1">Summary is required</div>
+              </div>
+
+              <div class="col-md-1">
                 <label class="form-label">&nbsp;</label>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary w-100">Save</button>
               </div>
             </form>
           </div>
@@ -159,3 +190,9 @@ export default {
     </section>
   </main>
 </template>
+
+<style>
+.required-mask {
+  color: red;
+}
+</style>

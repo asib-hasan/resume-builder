@@ -49,7 +49,7 @@ export default {
         if (res.status === 200) {
           educations.value = Array.isArray(res.data.data) ? res.data.data : [res.data.data]
         }
-      } catch (error) {
+      } catch {
         toast.error('Error loading education records.')
       }
     }
@@ -110,7 +110,7 @@ export default {
         })
         toast.success('Education deleted.')
         fetchEducations()
-      } catch (error) {
+      } catch {
         toast.error('Error deleting education.')
       }
     }
@@ -138,7 +138,7 @@ export default {
           fetchEducations()
           window.bootstrap.Modal.getInstance(document.getElementById('editEducationModal')).hide()
         }
-      } catch (error) {
+      } catch {
         toast.error('Error updating education.')
       }
     }
@@ -174,7 +174,7 @@ export default {
         )
 
         if (res.status === 200) toast.success('Sort order updated!')
-      } catch (error) {
+      } catch {
         toast.error('Sort update failed.')
       }
     }
@@ -224,6 +224,11 @@ export default {
             <li class="nav-item">
               <router-link to="/resume/education" class="nav-link active font-weight-bold"
                 >Education</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/skills" class="nav-link font-weight-bold"
+                >Skills</router-link
               >
             </li>
           </ul>

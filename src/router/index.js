@@ -28,6 +28,12 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/resume/skills',
+      name: 'resume-skills',
+      component: () => import('../views/my_resume/SkillsPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/',
       name: 'login',
       component: () => import('../views/LoginPage.vue'),
