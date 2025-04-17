@@ -16,13 +16,13 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
-      path: '/resume/experience',
+      path: '/resume/experiences',
       name: 'resume-experience',
       component: () => import('../views/my_resume/ExperiencesPage.vue'),
       meta: { requiresAuth: true }, // Protected route
     },
     {
-      path: '/resume/education',
+      path: '/resume/educations',
       name: 'resume-education',
       component: () => import('../views/my_resume/EducationPage.vue'),
       meta: { requiresAuth: true }, // Protected route
@@ -31,6 +31,18 @@ const router = createRouter({
       path: '/resume/skills',
       name: 'resume-skills',
       component: () => import('../views/my_resume/SkillsPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
+      path: '/resume/interests',
+      name: 'resume-interests',
+      component: () => import('../views/my_resume/InterestPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
+      path: '/resume/publications',
+      name: 'resume-publications',
+      component: () => import('../views/my_resume/PublicationPage.vue'),
       meta: { requiresAuth: true }, // Protected route
     },
     {

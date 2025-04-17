@@ -217,18 +217,28 @@ export default {
               >
             </li>
             <li class="nav-item tab-style">
-              <router-link to="/resume/experience" class="nav-link font-weight-bold"
+              <router-link to="/resume/experiences" class="nav-link font-weight-bold"
                 >Experience</router-link
               >
             </li>
             <li class="nav-item">
-              <router-link to="/resume/education" class="nav-link active font-weight-bold"
+              <router-link to="/resume/educations" class="nav-link active font-weight-bold"
                 >Education</router-link
               >
             </li>
             <li class="nav-item tab-style">
               <router-link to="/resume/skills" class="nav-link font-weight-bold"
                 >Skills</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/interest" class="nav-link font-weight-bold"
+                >Interest</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/publications" class="nav-link font-weight-bold"
+                >Publications</router-link
               >
             </li>
           </ul>
