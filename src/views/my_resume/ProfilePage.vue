@@ -1,56 +1,68 @@
-<script>
+<script setup>
 import SideBar from '@/layout/SideBar.vue'
+import CustomEditor from '@/components/CustomEditor.vue'
+import axios from 'axios'
 import useVuelidate from '@vuelidate/core'
-import { required, email, minLength, numeric } from '@vuelidate/validators'
+import { required, email, minLength } from '@vuelidate/validators'
 import { ref } from 'vue'
+import { useToast } from 'vue-toast-notification'
 
-// TinyMCE
-import Editor from '@tinymce/tinymce-vue'
+const form = ref({
+  first_name: '',
+  last_name: '',
+  gender: '',
+  dob: '',
+  marital_status: '',
+  profession: '',
+  address: '',
+  phone: '',
+  email: '',
+  summary: '',
+})
 
-export default {
-  components: {
-    SideBar,
-    Editor,
-  },
-  setup() {
-    const form = ref({
-      first_name: '',
-      last_name: '',
-      gender: '',
-      dob: '',
-      marital_status: '',
-      profession: '',
-      address: '',
-      phone: '',
-      email: '',
-      summary: '',
-    })
+const rules = {
+  first_name: { required },
+  last_name: { required },
+  gender: { required },
+  dob: { required },
+  marital_status: { required },
+  profession: { required },
+  address: { required },
+  phone: { required, minLength: minLength(10) },
+  email: { required, email },
+  summary: { required },
+}
 
-    const rules = {
-      first_name: { required },
-      last_name: { required },
-      gender: { required },
-      dob: { required },
-      marital_status: { required },
-      profession: { required },
-      address: { required },
-      phone: { required, numeric, minLength: minLength(10) },
-      email: { required, email },
-      summary: { required },
-    }
+const v$ = useVuelidate(rules, form)
+const token = localStorage.getItem('token')
+const toast = useToast()
 
-    const v$ = useVuelidate(rules, form)
+const submitForm = async () => {
+  v$.value.$validate()
+  if (!v$.value.$error) {
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/profile', form.value, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
 
-    const submitForm = () => {
-      v$.value.$validate()
-      if (!v$.value.$error) {
-        alert('Form submitted successfully!')
-        console.log(form.value)
+      toast.success('Profile updated successfully')
+      console.log(response.data)
+    } catch (error) {
+      console.error(error)
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors
+        for (const key in errors) {
+          toast.error(errors[key][0])
+        }
+      } else {
+        toast.error('Server error occurred.')
+        console.error(error)
       }
     }
-
-    return { form, v$, submitForm }
-  },
+  }
 }
 </script>
 
@@ -106,8 +118,9 @@ export default {
                 <label class="form-label">Gender <span class="required-mask">*</span></label>
                 <select v-model="form.gender" class="form-select">
                   <option value="">-- Select --</option>
-                  <option value="1">Male</option>
-                  <option value="2">Female</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
                 </select>
                 <div v-if="v$.gender.$error" class="text-danger">Gender is required</div>
               </div>
@@ -165,17 +178,20 @@ export default {
               </div>
 
               <div class="col-md-12">
-                <label class="form-label">Summary <span class="required-mask">*</span></label>
-                <Editor
-                  v-model="form.summary"
-                  api-key="cl1h71mod7y80bq4lsbz1rded087irddzyuhmqq56cj1ehb7"
-                  :init="{
-                    height: 300,
-                    menubar: false,
-                    plugins: 'lists link  preview',
-                    toolbar: 'undo redo | bold italic | bullist numlist  | preview',
-                  }"
-                />
+                <label class="form-label"
+                  >Summary <span class="required-mask">*</span>
+                  <a
+                    href="#"
+                    class="text-danger ai-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#aiModal"
+                  >
+                    <i class="bi bi-cpu"></i> Ask AI
+                  </a>
+                </label>
+                <div class="border rounded">
+                  <CustomEditor v-model="form.summary" />
+                </div>
                 <div v-if="v$.summary.$error" class="text-danger mt-1">Summary is required</div>
               </div>
 
@@ -184,6 +200,54 @@ export default {
                 <button type="submit" class="btn btn-primary w-100">Save</button>
               </div>
             </form>
+
+            <!-- Ask AI Modal -->
+            <div
+              class="modal fade"
+              id="aiModal"
+              tabindex="-1"
+              aria-labelledby="aiModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="aiModalLabel">AI Assistance</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>How can I help you? Ask me anything related to your responsibilities.</p>
+                    <textarea
+                      v-model="aiQuestion"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Type your question..."
+                    ></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" :disabled="isLoading">
+                      Close
+                    </button>
+                    <button class="btn btn-primary" @click="askAI" :disabled="isLoading">
+                      <span
+                        v-if="isLoading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      <span v-if="!isLoading">Ask</span>
+                      <span v-else class="ms-2">Waiting...</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Modal -->
           </div>
         </div>
       </div>

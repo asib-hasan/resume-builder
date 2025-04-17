@@ -271,14 +271,10 @@ export default {
                       <td>{{ element.title }}</td>
                       <td>{{ element.level }}</td>
                       <td>
-                        <a @click="editSkill(element)" class="text-primary" style="cursor: pointer"
+                        <a href="#" @click="editSkill(element)" class="text-primary"
                           ><i class="bi bi-pencil"></i> Edit
                         </a>
-                        <a
-                          @click="confirmDelete(element)"
-                          class="text-danger"
-                          style="cursor: pointer"
-                        >
+                        <a href="#" @click="confirmDelete(element)" class="text-danger">
                           <i class="bi bi-trash"></i> Delete
                         </a>
                       </td>

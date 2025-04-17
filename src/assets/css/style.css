@@ -104,6 +104,13 @@ h6 {
 .dropdown-menu .dropdown-item:hover {
   background-color: #f6f9ff;
 }
+.ai-button {
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  padding: 1px;
+  border-radius: 3px;
+  margin-left: 2px;
+}
 @media (min-width: 768px) {
   .dropdown-menu-arrow::before {
     content: '';

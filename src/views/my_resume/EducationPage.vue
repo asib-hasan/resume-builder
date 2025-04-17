@@ -286,7 +286,8 @@ export default {
                 </div>
               </div>
 
-              <div class="col-md-12">
+              <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
                 <button type="submit" class="btn btn-primary">Submit</button>
               </div>
             </form>
