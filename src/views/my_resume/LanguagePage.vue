@@ -1,7 +1,7 @@
 <script>
 import SideBar from '@/layout/SideBar.vue'
 import useVuelidate from '@vuelidate/core'
-import { required, url } from '@vuelidate/validators'
+import { required } from '@vuelidate/validators'
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import draggable from 'vuedraggable'
@@ -16,33 +16,32 @@ export default {
     const token = localStorage.getItem('token')
     const toast = useToast()
 
-    const form = ref({ details: '', link: '', year: '' })
-    const editForm = ref({ details: '', link: '', year: '' })
+    const form = ref({ name: '', level: '' })
+    const editForm = ref({ name: '', level: '' })
     const editingId = ref(null)
-    const publications = ref([])
-    const selectedDetails = ref('')
+    const languages = ref([])
+    const selectedLanguage = ref('')
 
-    const deleteTarget = ref({ id: null, details: '' })
+    const deleteTarget = ref({ id: null, name: '' })
 
     const rules = computed(() => ({
-      details: { required },
-      link: { required, url },
-      year: { required },
+      name: { required },
+      level: { required },
     }))
     const v$ = useVuelidate(rules, form)
 
-    const fetchPublications = async () => {
+    const fetchLanguages = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/publications', {
+        const res = await axios.get('http://127.0.0.1:8000/api/languages', {
           headers: { Authorization: `Bearer ${token}` },
         })
-        publications.value = Array.isArray(res.data.data) ? res.data.data : [res.data.data]
+        languages.value = Array.isArray(res.data.data) ? res.data.data : [res.data.data]
       } catch {
-        toast.error('Error loading publications.')
+        toast.error('Error loading languages.')
       }
     }
 
-    onMounted(fetchPublications)
+    onMounted(fetchLanguages)
 
     const submitForm = async () => {
       const isValid = await v$.value.$validate()
@@ -52,44 +51,39 @@ export default {
       }
 
       try {
-        const res = await axios.post('http://127.0.0.1:8000/api/publications', form.value, {
+        const res = await axios.post('http://127.0.0.1:8000/api/languages', form.value, {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (res.status === 201) {
-          toast.success('Publication added!')
-          fetchPublications()
-          form.value = { details: '', link: '', year: '' }
+          toast.success('Language added!')
+          fetchLanguages()
+          form.value = { name: '', level: '' }
           v$.value.$reset()
         }
       } catch {
-        toast.error('Error adding publication.')
+        toast.error('Error adding language.')
       }
     }
 
-    const editPublication = (item) => {
-      editForm.value = { details: item.details, link: item.link, year: item.year }
+    const editLanguage = (item) => {
+      editForm.value = { name: item.name, level: item.level }
       editingId.value = item.id
       window.bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show()
     }
 
-    const showDetails = (item) => {
-      selectedDetails.value = item.details
-      window.bootstrap.Modal.getOrCreateInstance(document.getElementById('viewDetailsModal')).show()
-    }
-
-    const updatePublication = async () => {
+    const updateLanguage = async () => {
       if (!editingId.value) return
       try {
         const res = await axios.put(
-          `http://127.0.0.1:8000/api/publications/${editingId.value}`,
+          `http://127.0.0.1:8000/api/languages/${editingId.value}`,
           editForm.value,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
         )
         if (res.status === 200) {
-          toast.success('Publication updated!')
-          fetchPublications()
+          toast.success('Language updated!')
+          fetchLanguages()
           window.bootstrap.Modal.getInstance(document.getElementById('editModal')).hide()
         }
       } catch {
@@ -98,17 +92,17 @@ export default {
     }
 
     const confirmDelete = (item) => {
-      deleteTarget.value = { id: item.id, details: item.details }
+      deleteTarget.value = { id: item.id, name: item.name }
       window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).show()
     }
 
     const performDelete = async () => {
       try {
-        await axios.delete(`http://127.0.0.1:8000/api/publications/${deleteTarget.value.id}`, {
+        await axios.delete(`http://127.0.0.1:8000/api/languages/${deleteTarget.value.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        toast.success('Publication deleted!')
-        fetchPublications()
+        toast.success('Language deleted!')
+        fetchLanguages()
       } catch {
         toast.error('Delete failed.')
       } finally {
@@ -118,18 +112,18 @@ export default {
 
     const onSortEnd = async () => {
       try {
-        const ordered = publications.value.map((item, index) => ({
+        const ordered = languages.value.map((item, index) => ({
           ...item,
           sort_order: index + 1,
         }))
         await axios.post(
-          'http://127.0.0.1:8000/api/update/publication/order',
-          { publications: ordered },
+          'http://127.0.0.1:8000/api/update/language/order',
+          { languagess: ordered },
           {
             headers: { Authorization: `Bearer ${token}` },
           },
         )
-        toast.success('Order updated!')
+        toast.success('Sort order updated!')
       } catch {
         toast.error('Sort order update failed.')
       }
@@ -139,17 +133,15 @@ export default {
       form,
       v$,
       submitForm,
-      publications,
+      languages,
       editForm,
       editingId,
-      editPublication,
-      updatePublication,
+      editLanguage,
+      updateLanguage,
       confirmDelete,
       performDelete,
       deleteTarget,
       onSortEnd,
-      showDetails,
-      selectedDetails,
     }
   },
 }
@@ -194,40 +186,32 @@ export default {
                 >Interest</router-link
               >
             </li>
-            <li class="nav-item">
-              <router-link to="/resume/publications" class="nav-link active font-weight-bold"
+            <li class="nav-item tab-style">
+              <router-link to="/resume/publications" class="nav-link font-weight-bold"
                 >Publications</router-link
               >
             </li>
-            <li class="nav-item tab-style">
-              <router-link to="/resume/languages" class="nav-link font-weight-bold"
+            <li class="nav-item">
+              <router-link to="/resume/languages" class="nav-link active font-weight-bold"
                 >Language</router-link
               >
             </li>
           </ul>
 
           <div class="tab-content">
-            <!-- Create Form -->
             <form @submit.prevent="submitForm" class="row g-3">
-              <div class="col-md-12">
-                <label class="form-label">Details <span class="required-mask">*</span></label>
-                <textarea v-model="form.details" class="form-control" rows="3" required></textarea>
-                <div v-if="v$.details.$dirty && v$.details.$error" class="text-danger">
-                  Details are required.
+              <div class="col-md-6">
+                <label class="form-label">Language Name <span class="required-mask">*</span></label>
+                <input v-model="form.name" type="text" class="form-control" required />
+                <div v-if="v$.name.$dirty && v$.name.$error" class="text-danger">
+                  Name is required.
                 </div>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Link <span class="required-mask">*</span></label>
-                <input v-model="form.link" type="text" class="form-control" required />
-                <div v-if="v$.link.$dirty && v$.link.$error" class="text-danger">
-                  Valid link is required.
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Year <span class="required-mask">*</span></label>
-                <input v-model="form.year" type="text" class="form-control" required />
-                <div v-if="v$.year.$dirty && v$.year.$error" class="text-danger">
-                  Year is required.
+                <label class="form-label">Level <span class="required-mask">*</span></label>
+                <input v-model="form.level" type="text" class="form-control" required />
+                <div v-if="v$.level.$dirty && v$.level.$error" class="text-danger">
+                  Level is required.
                 </div>
               </div>
               <div class="col-md-2">
@@ -239,81 +223,39 @@ export default {
               <table class="table table-bordered table-sm">
                 <thead>
                   <tr>
-                    <th class="table-th-width-40">Details</th>
-                    <th class="table-th-width-35">Link</th>
-                    <th class="table-th-width-10">Year</th>
-                    <th class="table-th-width-15">Actions</th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <draggable
-                  v-if="publications && publications.length > 0"
-                  v-model="publications"
+                  v-if="languages && languages.length > 0"
+                  v-model="languages"
                   tag="tbody"
                   item-key="id"
                   @end="onSortEnd"
                 >
                   <template #item="{ element }">
                     <tr>
+                      <td>{{ element.name }}</td>
+                      <td>{{ element.level }}</td>
                       <td>
-                        <span v-if="element.details.length <= 15">
-                          {{ element.details }}
-                        </span>
-                        <span v-else>
-                          {{ element.details.slice(0, 35) }}...
-                          <a href="#" @click.prevent="showDetails(element)"
-                            ><span class="text-primary">View</span></a
-                          >
-                        </span>
-                      </td>
-                      <td>
-                        <a :href="element.link" target="_blank"
-                          >{{ element.link.slice(0, 35) }}...</a
+                        <a href="#" @click.prevent="editLanguage(element)" class="text-primary"
+                          ><i class="bi bi-pencil"></i> Edit</a
                         >
-                      </td>
-                      <td>{{ element.year }}</td>
-                      <td>
-                        <a href="#" @click.prevent="editPublication(element)" class="text-primary">
-                          <i class="bi bi-pencil"></i> Edit
-                        </a>
-                        <a href="#" @click.prevent="confirmDelete(element)" class="text-danger">
-                          <i class="bi bi-trash"></i> Delete
-                        </a>
+                        <a href="#" @click.prevent="confirmDelete(element)" class="text-danger"
+                          ><i class="bi bi-trash"></i> Delete</a
+                        >
                       </td>
                     </tr>
                   </template>
                 </draggable>
                 <tbody v-else>
                   <tr>
-                    <td colspan="4" class="maroon">No records</td>
+                    <td colspan="3" class="maroon">No records</td>
                   </tr>
                 </tbody>
               </table>
-
-              <!-- View Full Details Modal -->
-              <div
-                class="modal fade"
-                id="viewDetailsModal"
-                tabindex="-1"
-                aria-labelledby="viewDetailsModalLabel"
-                aria-hidden="true"
-              >
-                <div class="modal-dialog modal-md">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="viewDetailsModalLabel">Publication Details</h5>
-                      <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                      />
-                    </div>
-                    <div class="modal-body">
-                      {{ selectedDetails }}
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <!-- Edit Modal -->
@@ -326,9 +268,9 @@ export default {
             >
               <div class="modal-dialog">
                 <div class="modal-content">
-                  <form @submit.prevent="updatePublication">
+                  <form @submit.prevent="updateLanguage">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="editModalLabel">Edit Publication</h5>
+                      <h5 class="modal-title" id="editModalLabel">Edit Language</h5>
                       <button
                         type="button"
                         class="btn-close"
@@ -338,20 +280,12 @@ export default {
                     </div>
                     <div class="modal-body row g-3">
                       <div class="col-md-12">
-                        <label class="form-label">Details</label>
-                        <textarea
-                          v-model="editForm.details"
-                          class="form-control"
-                          rows="3"
-                        ></textarea>
+                        <label class="form-label">Language Name</label>
+                        <input v-model="editForm.name" type="text" class="form-control" />
                       </div>
                       <div class="col-md-12">
-                        <label class="form-label">Link</label>
-                        <input v-model="editForm.link" type="url" class="form-control" />
-                      </div>
-                      <div class="col-md-12">
-                        <label class="form-label">Year</label>
-                        <input v-model="editForm.year" type="number" class="form-control" />
+                        <label class="form-label">Level</label>
+                        <input v-model="editForm.level" type="text" class="form-control" />
                       </div>
                     </div>
                     <div class="modal-footer">

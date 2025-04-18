@@ -46,6 +46,12 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/resume/languages',
+      name: 'resume-languages',
+      component: () => import('../views/my_resume/LanguagePage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/',
       name: 'login',
       component: () => import('../views/LoginPage.vue'),
