@@ -52,6 +52,12 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/resume/certifications',
+      name: 'resume-certifications',
+      component: () => import('../views/my_resume/CertificationPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/',
       name: 'login',
       component: () => import('../views/LoginPage.vue'),

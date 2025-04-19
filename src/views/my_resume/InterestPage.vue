@@ -44,7 +44,6 @@ export default {
     const submitForm = async () => {
       const isValid = await v$.value.$validate()
       if (!isValid) {
-        toast.error('Please fill all fields.')
         return
       }
 
@@ -195,10 +194,15 @@ export default {
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Area <span class="required-mask">*</span></label>
-                <input v-model="form.area" type="text" class="form-control" required />
-                <div v-if="v$.area.$dirty && v$.area.$error" class="text-danger">
-                  Area is required.
-                </div>
+                <input
+                  v-model="form.area"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.area.$dirty && v$.area.$error }"
+                />
+                <span v-if="v$.area.$dirty && v$.area.$error" class="error-msg"
+                  >Area required.</span
+                >
               </div>
 
               <div class="col-md-2">

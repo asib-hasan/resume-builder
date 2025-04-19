@@ -47,7 +47,6 @@ export default {
     const submitForm = async () => {
       const isValid = await v$.value.$validate()
       if (!isValid) {
-        toast.error('Please fill all fields correctly.')
         return
       }
 
@@ -211,24 +210,37 @@ export default {
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-12">
                 <label class="form-label">Details <span class="required-mask">*</span></label>
-                <textarea v-model="form.details" class="form-control" rows="3" required></textarea>
-                <div v-if="v$.details.$dirty && v$.details.$error" class="text-danger">
-                  Details are required.
-                </div>
+                <textarea
+                  v-model="form.details"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.details.$dirty && v$.details.$error }"
+                  rows="3"
+                ></textarea>
+                <span v-if="v$.details.$dirty && v$.details.$error" class="error-msg">
+                  Details required.
+                </span>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Link <span class="required-mask">*</span></label>
-                <input v-model="form.link" type="text" class="form-control" required />
-                <div v-if="v$.link.$dirty && v$.link.$error" class="text-danger">
-                  Valid link is required.
+                <input
+                  v-model="form.link"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.link.$dirty && v$.link.$error }"
+                />
+                <div v-if="v$.link.$dirty && v$.link.$error" class="error-msg">
+                  Valid link required.
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Year <span class="required-mask">*</span></label>
-                <input v-model="form.year" type="text" class="form-control" required />
-                <div v-if="v$.year.$dirty && v$.year.$error" class="text-danger">
-                  Year is required.
-                </div>
+                <input
+                  v-model="form.year"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.year.$dirty && v$.year.$error }"
+                />
+                <div v-if="v$.year.$dirty && v$.year.$error" class="error-msg">Year required.</div>
               </div>
               <div class="col-md-2">
                 <button type="submit" class="btn btn-primary">Submit</button>

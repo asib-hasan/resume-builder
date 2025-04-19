@@ -50,7 +50,6 @@ export default {
     const submitForm = async () => {
       const isValid = await v$.value.$validate()
       if (!isValid) {
-        toast.error('Please fill all fields.')
         return
       }
 
@@ -225,9 +224,14 @@ export default {
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Title <span class="required-mask">*</span></label>
-                <input v-model="form.title" type="text" class="form-control" required />
-                <div v-if="v$.title.$dirty && v$.title.$error" class="text-danger">
-                  Title is required.
+                <input
+                  v-model="form.title"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.title.$dirty && v$.title.$error }"
+                />
+                <div v-if="v$.title.$dirty && v$.title.$error" class="error-msg">
+                  Title required.
                 </div>
               </div>
 
@@ -241,11 +245,11 @@ export default {
                   max="10"
                   min="1"
                   class="form-control"
-                  required
+                  :class="{ 'is-invalid': v$.level.$dirty && v$.level.$error }"
                 />
-                <div v-if="v$.level.$dirty && v$.level.$error" class="text-danger">
-                  Level is required.
-                </div>
+                <span v-if="v$.level.$dirty && v$.level.$error" class="error-msg">
+                  Level required.
+                </span>
               </div>
 
               <div class="col-md-12">
