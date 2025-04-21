@@ -15,25 +15,25 @@
         </router-link>
       </li>
       <li class="nav-item">
-        <router-link class="nav-link" to="/profile">
+        <router-link class="nav-link" to="/blog/add">
           <i class="bi bi-pen"></i>
           <span>Blog</span>
         </router-link>
       </li>
       <li class="nav-item">
-        <router-link class="nav-link" to="/profile">
+        <router-link class="nav-link" to="">
           <i class="bi bi-journal-text"></i>
           <span>Case Study</span>
         </router-link>
       </li>
       <li class="nav-item">
-        <router-link class="nav-link" to="/profile">
+        <router-link class="nav-link" to="">
           <i class="bi bi-clipboard"></i>
           <span>Web Contents</span>
         </router-link>
       </li>
       <li class="nav-item">
-        <router-link class="nav-link" to="/profile">
+        <router-link class="nav-link" to="">
           <i class="bi bi-globe"></i>
           <span>Website</span>
         </router-link>

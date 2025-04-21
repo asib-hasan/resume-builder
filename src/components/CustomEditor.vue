@@ -3,7 +3,6 @@ import { onMounted, ref, watch } from 'vue'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 
-// Props
 const props = defineProps({
   modelValue: {
     type: String,
@@ -11,7 +10,6 @@ const props = defineProps({
   },
 })
 
-// Emits
 const emit = defineEmits(['update:modelValue'])
 
 const editorRef = ref(null)

@@ -10,6 +10,18 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/blog/add',
+      name: 'blog-add',
+      component: () => import('../views/blog/AddBlogPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
+      path: '/blog/list',
+      name: 'blog-list',
+      component: () => import('../views/blog/BlogListPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/resume/profile',
       name: 'resume-profile',
       component: () => import('../views/my_resume/ProfilePage.vue'),

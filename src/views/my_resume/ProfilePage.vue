@@ -126,7 +126,7 @@ const submitForm = async () => {
 
               <div class="col-md-4">
                 <label class="form-label">Gender <span class="required-mask">*</span></label>
-                <select v-model="form.gender" class="form-select">
+                <select v-model="form.gender" class="form-control">
                   <option value="">-- Select --</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
@@ -145,7 +145,7 @@ const submitForm = async () => {
                 <label class="form-label"
                   >Marital Status <span class="required-mask">*</span></label
                 >
-                <select v-model="form.marital_status" class="form-select">
+                <select v-model="form.marital_status" class="form-control">
                   <option value="">-- Select --</option>
                   <option value="1">Single</option>
                   <option value="2">Married</option>
