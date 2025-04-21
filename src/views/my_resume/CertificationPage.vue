@@ -89,7 +89,7 @@ export default {
     }
 
     const editCertification = (item) => {
-      editForm.value = { title: item.title, image: null }
+      editForm.value = { title: item.title, image: item.image }
       editingId.value = item.id
       window.bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show()
     }
@@ -118,8 +118,16 @@ export default {
           fetchCertifications()
           window.bootstrap.Modal.getInstance(document.getElementById('editModal')).hide()
         }
-      } catch {
-        toast.error('Error updating certification.')
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+          const errors = error.response.data.errors
+          for (const key in errors) {
+            toast.error(errors[key][0])
+          }
+        } else {
+          toast.error('Server error occurred.')
+          console.error(error)
+        }
       }
     }
 
@@ -236,6 +244,11 @@ export default {
             <li class="nav-item">
               <router-link to="/resume/certifications" class="nav-link active font-weight-bold"
                 >Certifications</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/awards" class="nav-link font-weight-bold"
+                >Awards & Honors</router-link
               >
             </li>
           </ul>
@@ -371,11 +384,13 @@ export default {
                     </div>
                     <div class="modal-body row g-3">
                       <div class="col-md-12">
-                        <label class="form-label">Title</label>
+                        <label class="form-label">Title <span class="required-mask">*</span></label>
                         <input v-model="editForm.title" type="text" class="form-control" />
                       </div>
                       <div class="col-md-12">
-                        <label class="form-label">Replace Image</label>
+                        <label class="form-label"
+                          >Replace Image <span class="required-mask">*</span></label
+                        >
                         <input type="file" class="form-control" @change="handleEditFileChange" />
                       </div>
                     </div>
