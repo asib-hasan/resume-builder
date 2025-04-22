@@ -49,11 +49,30 @@ const submitBlog = async () => {
           'Content-Type': 'multipart/form-data',
         },
       })
-      toast.success('Blog posted successfully!')
-      console.log(response.data)
+      if (response.status == 201) {
+        toast.success('Blog posted successfully!')
+        blogForm.value = {
+          title: '',
+          category: '',
+          date: '',
+          image: null,
+          description: '',
+        }
+        v$.value.$reset()
+      } else {
+        toast.error('Failed to post blog.')
+      }
     } catch (error) {
       console.error(error)
-      toast.error('Failed to post blog.')
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors
+        for (const key in errors) {
+          toast.error(errors[key][0])
+        }
+      } else {
+        toast.error('Server error occurred.')
+        console.error(error)
+      }
     }
   }
 }

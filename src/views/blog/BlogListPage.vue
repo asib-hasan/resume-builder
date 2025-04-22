@@ -1,62 +1,55 @@
 <script setup>
 import SideBar from '@/layout/SideBar.vue'
-import CustomEditor from '@/components/CustomEditor.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
-import useVuelidate from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
 import { useToast } from 'vue-toast-notification'
 
-const blogForm = ref({
-  title: '',
-  category: '',
-  date: '',
-  image: null,
-  description: '',
-})
-
-const rules = {
-  title: { required },
-  category: { required },
-  date: { required },
-  description: { required },
-}
-
-const v$ = useVuelidate(rules, blogForm)
+const blogs = ref([])
+const selectedBlogId = ref(null)
 const toast = useToast()
 const token = localStorage.getItem('token')
 
-const handleFileChange = (e) => {
-  blogForm.value.image = e.target.files[0]
-}
-
-const submitBlog = async () => {
-  v$.value.$validate()
-  if (!v$.value.$error) {
-    const formData = new FormData()
-    formData.append('title', blogForm.value.title)
-    formData.append('category', blogForm.value.category)
-    formData.append('date', blogForm.value.date)
-    formData.append('description', blogForm.value.description)
-    if (blogForm.value.image) {
-      formData.append('image', blogForm.value.image)
-    }
-
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/api/blogs', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      toast.success('Blog posted successfully!')
-      console.log(response.data)
-    } catch (error) {
-      console.error(error)
-      toast.error('Failed to post blog.')
-    }
+// Fetch blogs from API
+const fetchBlogs = async () => {
+  try {
+    const res = await axios.get('http://127.0.0.1:8000/api/blogs', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    blogs.value = res.data.data
+  } catch (error) {
+    console.error(error)
+    toast.error('Failed to load blogs.')
   }
 }
+
+// Open delete modal
+const confirmDelete = (id) => {
+  selectedBlogId.value = id
+  window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).show()
+}
+
+// Perform delete
+const performDelete = async () => {
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/blogs/${selectedBlogId.value}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    toast.success('Blog deleted successfully!')
+    fetchBlogs()
+    window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).hide()
+  } catch (error) {
+    console.error(error)
+    toast.error('Failed to delete blog.')
+  }
+}
+
+onMounted(() => {
+  fetchBlogs()
+})
 </script>
 
 <template>
@@ -74,20 +67,16 @@ const submitBlog = async () => {
         <div class="col-md-12">
           <ul class="nav nav-tabs nav-tabs-bordered d-flex">
             <li class="nav-item tab-style">
-              <a href="#" class="nav-link font-weight-bold">Create Blog</a>
+              <router-link to="/blog/add" class="nav-link font-weight-bold"
+                >Create Blog</router-link
+              >
             </li>
             <li class="nav-item">
-              <router-link to="/blogs/list" class="nav-link active font-weight-bold"
-                >List</router-link
-              >
+              <a href="#" class="nav-link active font-weight-bold">List</a>
             </li>
           </ul>
 
           <div class="tab-content">
-            <div class="d-flex justify-content-between mb-3">
-              <h5 class="fw-bold">My Blogs</h5>
-            </div>
-
             <div class="table-responsive">
               <table class="table table-bordered table-hover table-sm">
                 <thead>
@@ -99,14 +88,19 @@ const submitBlog = async () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Welcome to the blog list page. Here you can........</td>
-                    <td>Programming</td>
-                    <td>22 April, 2024</td>
+                  <tr v-for="blog in blogs" :key="blog.id">
+                    <td :title="blog.title">
+                      {{ blog.title.length > 40 ? blog.title.slice(0, 40) + '...' : blog.title }}
+                    </td>
+
+                    <td>{{ blog.category }}</td>
+                    <td>{{ new Date(blog.date).toLocaleDateString() }}</td>
                     <td>
-                      <a href="#"><i class="bi bi-eye"></i> Link </a>
-                      <i class="bi bi-pencil"></i> Edit
-                      <a href="#" @click.prevent="confirmDelete(item)" class="text-danger">
+                      <router-link :to="`/blog/edit/${blog.id}`">
+                        <span class="text-primary"><i class="bi bi-pencil"></i> Edit</span>
+                      </router-link>
+
+                      <a href="#" @click.prevent="confirmDelete(blog.id)" class="text-danger">
                         <i class="bi bi-trash"></i> Delete
                       </a>
                     </td>
@@ -164,9 +158,3 @@ const submitBlog = async () => {
     </section>
   </main>
 </template>
-
-<style scoped>
-.required-mask {
-  color: red;
-}
-</style>
