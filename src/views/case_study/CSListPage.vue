@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useToast } from 'vue-toast-notification'
 
-const blogs = ref([])
+const cslist = ref([])
 const selectID = ref(null)
 const toast = useToast()
 const token = localStorage.getItem('token')
@@ -17,7 +17,7 @@ const fetchBlogs = async () => {
         Authorization: `Bearer ${token}`,
       },
     })
-    blogs.value = res.data.data
+    cslist.value = res.data.data
   } catch (error) {
     console.error(error)
     toast.error('Failed to load blogs.')
@@ -110,9 +110,9 @@ onMounted(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="val in blogs" :key="val.id">
+                  <tr v-for="val in cslist" :key="val.id">
                     <td :title="val.title">
-                      {{ val.title.length > 40 ? val.title.slice(0, 40) + '...' : val.title }}
+                      {{ val.title.length > 40 ? blog.title.slice(0, 40) + '...' : blog.title }}
                     </td>
 
                     <td>{{ val.category }}</td>
@@ -142,7 +142,7 @@ onMounted(() => {
                     </td>
 
                     <td>
-                      <router-link :to="`/blog/edit/${val.id}`">
+                      <router-link :to="`/case/study/edit/${val.id}`">
                         <span class="text-primary"><i class="bi bi-pencil"></i> Edit</span>
                       </router-link>
 
