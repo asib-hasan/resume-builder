@@ -81,9 +81,10 @@ onMounted(() => {
               <table class="table table-bordered table-hover table-sm">
                 <thead>
                   <tr>
-                    <th class="table-th-width-40">Title</th>
-                    <th class="table-th-width-35">Category</th>
+                    <th class="table-th-width-30">Title</th>
+                    <th class="table-th-width-20">Category</th>
                     <th class="table-th-width-10">Date</th>
+                    <th class="table-th-width-15">Status</th>
                     <th class="table-th-width-15">Actions</th>
                   </tr>
                 </thead>
@@ -95,6 +96,22 @@ onMounted(() => {
 
                     <td>{{ blog.category }}</td>
                     <td>{{ new Date(blog.date).toLocaleDateString() }}</td>
+
+                    <td>
+                      <div class="form-check form-switch">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          :id="`switch-${blog.id}`"
+                          v-model="blog.status"
+                          @change="toggleStatus(blog.id, blog.status)"
+                        />
+                        <label class="form-check-label" :for="`switch-${blog.id}`">
+                          {{ blog.status ? 'Active' : 'Inactive' }}
+                        </label>
+                      </div>
+                    </td>
+
                     <td>
                       <router-link :to="`/blog/edit/${blog.id}`">
                         <span class="text-primary"><i class="bi bi-pencil"></i> Edit</span>

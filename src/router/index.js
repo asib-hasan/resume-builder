@@ -16,6 +16,12 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/blog/edit/:id',
+      name: 'blog-edit',
+      component: () => import('../views/blog/EditBlogPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/blog/list',
       name: 'blog-list',
       component: () => import('../views/blog/BlogListPage.vue'),

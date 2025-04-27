@@ -1,11 +1,18 @@
 <script setup>
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import SideBar from '@/layout/SideBar.vue'
 import CustomEditor from '@/components/CustomEditor.vue'
-import { ref } from 'vue'
-import axios from 'axios'
 import useVuelidate from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { useToast } from 'vue-toast-notification'
+import axios from 'axios'
+
+const route = useRoute()
+const router = useRouter()
+const blogId = route.params.id
+const toast = useToast()
+const token = localStorage.getItem('token')
 
 const blogForm = ref({
   title: '',
@@ -23,14 +30,30 @@ const rules = {
 }
 
 const v$ = useVuelidate(rules, blogForm)
-const toast = useToast()
-const token = localStorage.getItem('token')
 
 const handleFileChange = (e) => {
   blogForm.value.image = e.target.files[0]
 }
 
-const submitBlog = async () => {
+const getBlogData = async () => {
+  try {
+    const response = await axios.get(`http://127.0.0.1:8000/api/single/blog/${blogId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    const data = response.data.data
+    blogForm.value.title = data.title
+    blogForm.value.category = data.category
+    blogForm.value.date = data.date
+    blogForm.value.description = data.description
+  } catch (error) {
+    toast.error('Failed to fetch blog data.')
+    console.error(error)
+  }
+}
+
+const updateBlog = async () => {
   v$.value.$validate()
   if (!v$.value.$error) {
     const formData = new FormData()
@@ -41,29 +64,23 @@ const submitBlog = async () => {
     if (blogForm.value.image) {
       formData.append('image', blogForm.value.image)
     }
+    formData.append('_method', 'PUT')
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/blogs', formData, {
+      const response = await axios.post(`http://127.0.0.1:8000/api/blogs/${blogId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       })
-      if (response.status == 201) {
-        toast.success('Blog posted successfully!')
-        blogForm.value = {
-          title: '',
-          category: '',
-          date: '',
-          image: null,
-          description: '',
-        }
-        v$.value.$reset()
+
+      if (response.status === 200) {
+        toast.success('Blog updated successfully!')
+        router.push('/blog/list')
       } else {
-        toast.error('Failed to post blog.')
+        toast.error('Failed to update blog.')
       }
     } catch (error) {
-      console.error(error)
       if (error.response && error.response.status === 422) {
         const errors = error.response.data.errors
         for (const key in errors) {
@@ -76,6 +93,10 @@ const submitBlog = async () => {
     }
   }
 }
+
+onMounted(() => {
+  getBlogData()
+})
 </script>
 
 <template>
@@ -92,17 +113,17 @@ const submitBlog = async () => {
       <div class="row">
         <div class="col-md-12">
           <ul class="nav nav-tabs nav-tabs-bordered d-flex">
-            <li class="nav-item">
-              <a href="#" class="nav-link active font-weight-bold">Create Blog</a>
-            </li>
             <li class="nav-item tab-style">
               <router-link to="/blog/list" class="nav-link font-weight-bold">List</router-link>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link active font-weight-bold">Edit Blog</a>
             </li>
           </ul>
 
           <!-- Tab Content -->
           <div class="tab-content">
-            <form @submit.prevent="submitBlog" class="row g-3">
+            <form @submit.prevent="updateBlog" class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Title <span class="required-mask">*</span></label>
                 <input
