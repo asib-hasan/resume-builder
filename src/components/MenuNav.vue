@@ -21,7 +21,7 @@
         </router-link>
       </li>
       <li class="nav-item">
-        <router-link class="nav-link" to="">
+        <router-link class="nav-link" to="/case/study/add">
           <i class="bi bi-journal-text"></i>
           <span>Case Study</span>
         </router-link>

@@ -11,11 +11,11 @@ import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
-const blogId = route.params.id
+const primaryID = route.params.id
 const toast = useToast()
 const token = localStorage.getItem('token')
 const previewImage = ref(null)
-const blogForm = ref({
+const formFields = ref({
   title: '',
   category: '',
   date: '',
@@ -30,52 +30,53 @@ const rules = {
   description: { required },
 }
 
-const v$ = useVuelidate(rules, blogForm)
+const v$ = useVuelidate(rules, formFields)
 
 const handleFileChange = (e) => {
   const file = e.target.files[0]
-  blogForm.value.image = file
+  formFields.value.image = file
   if (file) {
     previewImage.value = URL.createObjectURL(file)
   }
 }
 
-const getBlogData = async () => {
+const getData = async () => {
   try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/single/blog/${blogId}`, {
+    const response = await axios.get(`http://127.0.0.1:8000/api/single/cs/${primaryID}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
     const data = response.data.data
-    blogForm.value.title = data.title
-    blogForm.value.category = data.category
-    blogForm.value.date = data.date
-    blogForm.value.description = data.description
+    formFields.value.title = data.title
+    formFields.value.category = data.category
+    formFields.value.date = data.date
+    formFields.value.description = data.description
     if (data.image) {
       previewImage.value = `${baseImageURL}/${data.image}`
     }
   } catch (error) {
-    toast.error('Failed to fetch blog data.')
+    toast.error('Failed to fetch case study data.')
     console.error(error)
   }
 }
 
-const updateBlog = async () => {
+const updateData = async () => {
   v$.value.$validate()
   if (!v$.value.$error) {
     const formData = new FormData()
-    formData.append('title', blogForm.value.title)
-    formData.append('category', blogForm.value.category)
-    formData.append('date', blogForm.value.date)
-    formData.append('description', blogForm.value.description)
-    if (blogForm.value.image) {
-      formData.append('image', blogForm.value.image)
+    formData.append('title', formFields.value.title)
+    formData.append('category', formFields.value.category)
+    formData.append('date', formFields.value.date)
+    formData.append('description', formFields.value.description)
+    if (formFields.value.image) {
+      formData.append('image', formFields.value.image)
     }
+    console.log('Form Data:', formData)
     formData.append('_method', 'PUT')
 
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/api/blogs/${blogId}`, formData, {
+      const response = await axios.post(`http://127.0.0.1:8000/api/cs/${primaryID}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -83,10 +84,10 @@ const updateBlog = async () => {
       })
 
       if (response.status === 200) {
-        toast.success('Blog updated successfully!')
-        router.push('/blog/list')
+        toast.success('Case Study updated successfully!')
+        router.push('/case/study/list')
       } else {
-        toast.error('Failed to update blog.')
+        toast.error('Failed to update case study.')
       }
     } catch (error) {
       if (error.response && error.response.status === 422) {
@@ -108,7 +109,7 @@ const openImageModal = () => {
 }
 
 onMounted(() => {
-  getBlogData()
+  getData()
 })
 </script>
 
@@ -118,7 +119,7 @@ onMounted(() => {
     <div class="pagetitle">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active">Blog</li>
+        <li class="breadcrumb-item active">Case Study</li>
       </ol>
     </div>
 
@@ -127,20 +128,22 @@ onMounted(() => {
         <div class="col-md-12">
           <ul class="nav nav-tabs nav-tabs-bordered d-flex">
             <li class="nav-item tab-style">
-              <router-link to="/blog/list" class="nav-link font-weight-bold">List</router-link>
+              <router-link to="/case/study/list" class="nav-link font-weight-bold"
+                >List</router-link
+              >
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link active font-weight-bold">Edit Blog</a>
+              <a href="#" class="nav-link active font-weight-bold">Edit Case Study</a>
             </li>
           </ul>
 
           <!-- Tab Content -->
           <div class="tab-content">
-            <form @submit.prevent="updateBlog" class="row g-3">
+            <form @submit.prevent="updateData" class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Title <span class="required-mask">*</span></label>
                 <input
-                  v-model="blogForm.title"
+                  v-model="formFields.title"
                   type="text"
                   class="form-control"
                   :class="{ 'is-invalid': v$.title.$dirty && v$.title.$error }"
@@ -151,7 +154,7 @@ onMounted(() => {
               <div class="col-md-6">
                 <label class="form-label">Category <span class="required-mask">*</span></label>
                 <input
-                  v-model="blogForm.category"
+                  v-model="formFields.category"
                   type="text"
                   class="form-control"
                   :class="{ 'is-invalid': v$.category.$dirty && v$.category.$error }"
@@ -162,7 +165,7 @@ onMounted(() => {
               <div class="col-md-6">
                 <label class="form-label">Date <span class="required-mask">*</span></label>
                 <input
-                  v-model="blogForm.date"
+                  v-model="formFields.date"
                   type="date"
                   class="form-control"
                   :class="{ 'is-invalid': v$.date.$dirty && v$.date.$error }"
@@ -189,7 +192,7 @@ onMounted(() => {
               <div class="col-md-12">
                 <label class="form-label">Description <span class="required-mask">*</span></label>
                 <div class="border rounded">
-                  <CustomEditor v-model="blogForm.description" />
+                  <CustomEditor v-model="formFields.description" />
                 </div>
                 <div v-if="v$.description.$error" class="error-msg mt-1">Description required</div>
               </div>

@@ -28,6 +28,24 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/case/study/add',
+      name: 'case-study-add',
+      component: () => import('../views/case_study/AddCSPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
+      path: '/case/study/edit/:id',
+      name: 'case-study-edit',
+      component: () => import('../views/case_study/EditCSPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
+      path: '/case/study/list',
+      name: 'case-study-list',
+      component: () => import('../views/case_study/CSListPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/resume/profile',
       name: 'resume-profile',
       component: () => import('../views/my_resume/ProfilePage.vue'),

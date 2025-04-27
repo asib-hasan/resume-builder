@@ -7,7 +7,7 @@ import useVuelidate from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { useToast } from 'vue-toast-notification'
 
-const FormData = ref({
+const FormFields = ref({
   title: '',
   category: '',
   date: '',
@@ -22,28 +22,28 @@ const rules = {
   description: { required },
 }
 
-const v$ = useVuelidate(rules, FormData)
+const v$ = useVuelidate(rules, FormFields)
 const toast = useToast()
 const token = localStorage.getItem('token')
 
 const handleFileChange = (e) => {
-  FormData.value.image = e.target.files[0]
+  FormFields.value.image = e.target.files[0]
 }
 
 const submit = async () => {
   v$.value.$validate()
   if (!v$.value.$error) {
     const formData = new FormData()
-    formData.append('title', FormData.value.title)
-    formData.append('category', FormData.value.category)
-    formData.append('date', FormData.value.date)
-    formData.append('description', FormData.value.description)
-    if (FormData.value.image) {
-      formData.append('image', FormData.value.image)
+    formData.append('title', FormFields.value.title)
+    formData.append('category', FormFields.value.category)
+    formData.append('date', FormFields.value.date)
+    formData.append('description', FormFields.value.description)
+    if (FormFields.value.image) {
+      formData.append('image', FormFields.value.image)
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/blogs', formData, {
+      const response = await axios.post('http://127.0.0.1:8000/api/cs', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -51,7 +51,7 @@ const submit = async () => {
       })
       if (response.status == 201) {
         toast.success('Case Study posted successfully!')
-        FormData.value = {
+        FormFields.value = {
           title: '',
           category: '',
           date: '',
@@ -60,7 +60,7 @@ const submit = async () => {
         }
         v$.value.$reset()
       } else {
-        toast.error('Failed to post blog.')
+        toast.error('Failed to post case study.')
       }
     } catch (error) {
       console.error(error)
@@ -96,7 +96,9 @@ const submit = async () => {
               <a href="#" class="nav-link active font-weight-bold">Create Case Study</a>
             </li>
             <li class="nav-item tab-style">
-              <router-link to="/blog/list" class="nav-link font-weight-bold">List</router-link>
+              <router-link to="/case/study/list" class="nav-link font-weight-bold"
+                >List</router-link
+              >
             </li>
           </ul>
 
@@ -106,7 +108,7 @@ const submit = async () => {
               <div class="col-md-6">
                 <label class="form-label">Title <span class="required-mask">*</span></label>
                 <input
-                  v-model="FormData.title"
+                  v-model="FormFields.title"
                   type="text"
                   class="form-control"
                   :class="{ 'is-invalid': v$.title.$dirty && v$.title.$error }"
@@ -117,7 +119,7 @@ const submit = async () => {
               <div class="col-md-6">
                 <label class="form-label">Category <span class="required-mask">*</span></label>
                 <input
-                  v-model="FormData.category"
+                  v-model="FormFields.category"
                   type="text"
                   class="form-control"
                   :class="{ 'is-invalid': v$.category.$dirty && v$.category.$error }"
@@ -128,7 +130,7 @@ const submit = async () => {
               <div class="col-md-6">
                 <label class="form-label">Date <span class="required-mask">*</span></label>
                 <input
-                  v-model="FormData.date"
+                  v-model="FormFields.date"
                   type="date"
                   class="form-control"
                   :class="{ 'is-invalid': v$.date.$dirty && v$.date.$error }"
@@ -144,7 +146,7 @@ const submit = async () => {
               <div class="col-md-12">
                 <label class="form-label">Description <span class="required-mask">*</span></label>
                 <div class="border rounded">
-                  <CustomEditor v-model="FormData.description" />
+                  <CustomEditor v-model="FormFields.description" />
                 </div>
                 <div v-if="v$.description.$error" class="error-msg mt-1">Description required</div>
               </div>

@@ -15,7 +15,7 @@ const blogId = route.params.id
 const toast = useToast()
 const token = localStorage.getItem('token')
 const previewImage = ref(null)
-const blogForm = ref({
+const formFields = ref({
   title: '',
   category: '',
   date: '',
@@ -30,11 +30,11 @@ const rules = {
   description: { required },
 }
 
-const v$ = useVuelidate(rules, blogForm)
+const v$ = useVuelidate(rules, formFields)
 
 const handleFileChange = (e) => {
   const file = e.target.files[0]
-  blogForm.value.image = file
+  formFields.value.image = file
   if (file) {
     previewImage.value = URL.createObjectURL(file)
   }
@@ -48,10 +48,10 @@ const getBlogData = async () => {
       },
     })
     const data = response.data.data
-    blogForm.value.title = data.title
-    blogForm.value.category = data.category
-    blogForm.value.date = data.date
-    blogForm.value.description = data.description
+    formFields.value.title = data.title
+    formFields.value.category = data.category
+    formFields.value.date = data.date
+    formFields.value.description = data.description
     if (data.image) {
       previewImage.value = `${baseImageURL}/${data.image}`
     }
@@ -65,12 +65,12 @@ const updateBlog = async () => {
   v$.value.$validate()
   if (!v$.value.$error) {
     const formData = new FormData()
-    formData.append('title', blogForm.value.title)
-    formData.append('category', blogForm.value.category)
-    formData.append('date', blogForm.value.date)
-    formData.append('description', blogForm.value.description)
-    if (blogForm.value.image) {
-      formData.append('image', blogForm.value.image)
+    formData.append('title', formFields.value.title)
+    formData.append('category', formFields.value.category)
+    formData.append('date', formFields.value.date)
+    formData.append('description', formFields.value.description)
+    if (formFields.value.image) {
+      formData.append('image', formFields.value.image)
     }
     formData.append('_method', 'PUT')
 
@@ -140,7 +140,7 @@ onMounted(() => {
               <div class="col-md-6">
                 <label class="form-label">Title <span class="required-mask">*</span></label>
                 <input
-                  v-model="blogForm.title"
+                  v-model="formFields.title"
                   type="text"
                   class="form-control"
                   :class="{ 'is-invalid': v$.title.$dirty && v$.title.$error }"
@@ -151,7 +151,7 @@ onMounted(() => {
               <div class="col-md-6">
                 <label class="form-label">Category <span class="required-mask">*</span></label>
                 <input
-                  v-model="blogForm.category"
+                  v-model="formFields.category"
                   type="text"
                   class="form-control"
                   :class="{ 'is-invalid': v$.category.$dirty && v$.category.$error }"
@@ -162,7 +162,7 @@ onMounted(() => {
               <div class="col-md-6">
                 <label class="form-label">Date <span class="required-mask">*</span></label>
                 <input
-                  v-model="blogForm.date"
+                  v-model="formFields.date"
                   type="date"
                   class="form-control"
                   :class="{ 'is-invalid': v$.date.$dirty && v$.date.$error }"
@@ -189,7 +189,7 @@ onMounted(() => {
               <div class="col-md-12">
                 <label class="form-label">Description <span class="required-mask">*</span></label>
                 <div class="border rounded">
-                  <CustomEditor v-model="blogForm.description" />
+                  <CustomEditor v-model="formFields.description" />
                 </div>
                 <div v-if="v$.description.$error" class="error-msg mt-1">Description required</div>
               </div>

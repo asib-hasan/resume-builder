@@ -9,10 +9,10 @@ const selectID = ref(null)
 const toast = useToast()
 const token = localStorage.getItem('token')
 
-// Fetch blogs from API
-const fetchBlogs = async () => {
+// Fetch case study from API
+const fetchData = async () => {
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/blogs', {
+    const res = await axios.get('http://127.0.0.1:8000/api/cs', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -20,7 +20,7 @@ const fetchBlogs = async () => {
     cslist.value = res.data.data
   } catch (error) {
     console.error(error)
-    toast.error('Failed to load blogs.')
+    toast.error('Failed to load case study.')
   }
 }
 
@@ -33,13 +33,13 @@ const confirmDelete = (id) => {
 // Perform delete
 const performDelete = async () => {
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/blogs/${selectID.value}`, {
+    await axios.delete(`http://127.0.0.1:8000/api/cs/${selectID.value}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
     toast.success('Blog deleted successfully!')
-    fetchBlogs()
+    fetchData()
     window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).hide()
   } catch (error) {
     console.error(error)
@@ -50,7 +50,7 @@ const performDelete = async () => {
 const toggleStatus = async (id, status) => {
   try {
     await axios.put(
-      `http://127.0.0.1:8000/api/blogs/update/status/${id}`,
+      `http://127.0.0.1:8000/api/cs/update/status/${id}`,
       {
         status: status,
       },
@@ -60,8 +60,8 @@ const toggleStatus = async (id, status) => {
         },
       },
     )
-    toast.success('Blog status updated successfully!')
-    fetchBlogs()
+    toast.success('Case study status updated successfully!')
+    fetchData()
   } catch (error) {
     console.error(error)
     toast.error('Failed to update blog status.')
@@ -69,7 +69,7 @@ const toggleStatus = async (id, status) => {
 }
 
 onMounted(() => {
-  fetchBlogs()
+  fetchData()
 })
 </script>
 
@@ -79,7 +79,7 @@ onMounted(() => {
     <div class="pagetitle">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active">Blog</li>
+        <li class="breadcrumb-item active">Case Study</li>
       </ol>
     </div>
 
@@ -88,8 +88,8 @@ onMounted(() => {
         <div class="col-md-12">
           <ul class="nav nav-tabs nav-tabs-bordered d-flex">
             <li class="nav-item tab-style">
-              <router-link to="/blog/add" class="nav-link font-weight-bold"
-                >Create Blog</router-link
+              <router-link to="/case/study/add" class="nav-link font-weight-bold"
+                >Create Case Study</router-link
               >
             </li>
             <li class="nav-item">
@@ -112,7 +112,7 @@ onMounted(() => {
                 <tbody>
                   <tr v-for="val in cslist" :key="val.id">
                     <td :title="val.title">
-                      {{ val.title.length > 40 ? blog.title.slice(0, 40) + '...' : blog.title }}
+                      {{ val.title.length > 40 ? val.title.slice(0, 40) + '...' : val.title }}
                     </td>
 
                     <td>{{ val.category }}</td>

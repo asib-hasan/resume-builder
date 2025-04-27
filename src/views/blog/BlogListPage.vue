@@ -10,7 +10,7 @@ const toast = useToast()
 const token = localStorage.getItem('token')
 
 // Fetch blogs from API
-const fetchBlogs = async () => {
+const fetchData = async () => {
   try {
     const res = await axios.get('http://127.0.0.1:8000/api/blogs', {
       headers: {
@@ -39,7 +39,7 @@ const performDelete = async () => {
       },
     })
     toast.success('Blog deleted successfully!')
-    fetchBlogs()
+    fetchData()
     window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).hide()
   } catch (error) {
     console.error(error)
@@ -61,7 +61,7 @@ const toggleStatus = async (id, status) => {
       },
     )
     toast.success('Blog status updated successfully!')
-    fetchBlogs()
+    fetchData()
   } catch (error) {
     console.error(error)
     toast.error('Failed to update blog status.')
@@ -69,7 +69,7 @@ const toggleStatus = async (id, status) => {
 }
 
 onMounted(() => {
-  fetchBlogs()
+  fetchData()
 })
 </script>
 
