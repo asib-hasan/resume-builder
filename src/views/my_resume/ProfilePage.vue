@@ -1,6 +1,7 @@
 <script setup>
 import SideBar from '@/layout/SideBar.vue'
 import CustomEditor from '@/components/CustomEditor.vue'
+import { onMounted } from 'vue'
 import axios from 'axios'
 import useVuelidate from '@vuelidate/core'
 import { required, email, minLength } from '@vuelidate/validators'
@@ -64,6 +65,9 @@ const submitForm = async () => {
     }
   }
 }
+onMounted(() => {
+  document.getElementById('my-resume').classList.add('nav-active')
+})
 </script>
 
 <template>
@@ -81,7 +85,9 @@ const submitForm = async () => {
         <div class="col-md-12">
           <ul class="nav nav-tabs nav-tabs-bordered d-flex">
             <li class="nav-item">
-              <a href="#" class="nav-link active font-weight-bold">Personal</a>
+              <router-link to="/resume/profile" class="nav-link active font-weight-bold"
+                >Personal</router-link
+              >
             </li>
             <li class="nav-item tab-style">
               <router-link to="/resume/experiences" class="nav-link font-weight-bold"
@@ -99,13 +105,28 @@ const submitForm = async () => {
               >
             </li>
             <li class="nav-item tab-style">
-              <router-link to="/resume/interest" class="nav-link font-weight-bold"
+              <router-link to="/resume/interests" class="nav-link font-weight-bold"
                 >Interest</router-link
               >
             </li>
             <li class="nav-item tab-style">
               <router-link to="/resume/publications" class="nav-link font-weight-bold"
                 >Publications</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/languages" class="nav-link font-weight-bold"
+                >Language</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/certifications" class="nav-link font-weight-bold"
+                >Certifications</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/awards" class="nav-link font-weight-bold"
+                >Awards & Honors</router-link
               >
             </li>
           </ul>
@@ -264,9 +285,3 @@ const submitForm = async () => {
     </section>
   </main>
 </template>
-
-<style>
-.required-mask {
-  color: red;
-}
-</style>

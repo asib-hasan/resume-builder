@@ -1,7 +1,7 @@
 <script setup>
 import SideBar from '@/layout/SideBar.vue'
 import CustomEditor from '@/components/CustomEditor.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import useVuelidate from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
@@ -76,6 +76,9 @@ const submitBlog = async () => {
     }
   }
 }
+onMounted(() => {
+  document.getElementById('my-blog').classList.add('nav-active')
+})
 </script>
 
 <template>

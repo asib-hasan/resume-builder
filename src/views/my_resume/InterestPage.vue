@@ -39,7 +39,9 @@ export default {
       }
     }
 
-    onMounted(fetchInterests)
+    onMounted(() => {
+      document.getElementById('my-resume').classList.add('nav-active'), fetchInterests()
+    })
 
     const submitForm = async () => {
       const isValid = await v$.value.$validate()
@@ -186,6 +188,21 @@ export default {
             <li class="nav-item tab-style">
               <router-link to="/resume/publications" class="nav-link font-weight-bold"
                 >Publications</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/languages" class="nav-link font-weight-bold"
+                >Language</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/certifications" class="nav-link font-weight-bold"
+                >Certifications</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/awards" class="nav-link font-weight-bold"
+                >Awards & Honors</router-link
               >
             </li>
           </ul>

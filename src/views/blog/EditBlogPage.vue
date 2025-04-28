@@ -109,6 +109,7 @@ const openImageModal = () => {
 
 onMounted(() => {
   getBlogData()
+  document.getElementById('my-blog').classList.add('nav-active')
 })
 </script>
 

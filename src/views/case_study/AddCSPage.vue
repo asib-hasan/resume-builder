@@ -1,7 +1,7 @@
 <script setup>
 import SideBar from '@/layout/SideBar.vue'
 import CustomEditor from '@/components/CustomEditor.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import useVuelidate from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
@@ -76,6 +76,10 @@ const submit = async () => {
     }
   }
 }
+
+onMounted(() => {
+  document.getElementById('case-study').classList.add('nav-active')
+})
 </script>
 
 <template>

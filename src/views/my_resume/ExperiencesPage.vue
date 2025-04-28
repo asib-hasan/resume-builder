@@ -68,6 +68,7 @@ export default {
     }
 
     onMounted(() => {
+      document.getElementById('my-resume').classList.add('nav-active')
       fetchExperiences()
     })
 
@@ -367,6 +368,21 @@ export default {
                 >Publications</router-link
               >
             </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/languages" class="nav-link font-weight-bold"
+                >Language</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/certifications" class="nav-link font-weight-bold"
+                >Certifications</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/awards" class="nav-link font-weight-bold"
+                >Awards & Honors</router-link
+              >
+            </li>
           </ul>
 
           <div class="tab-content">
@@ -420,15 +436,17 @@ export default {
               </div>
 
               <div class="col-md-12">
-                <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#aiModal">
-                  <i class="bi bi-cpu"></i> Ask AI for Assistance
-                </a>
-              </div>
-
-              <div class="col-md-12">
                 <label class="form-label"
-                  >Responsibilities <span class="required-mask">*</span></label
-                >
+                  >Responsibilities <span class="required-mask">*</span>
+                  <a
+                    href="#"
+                    class="text-danger ai-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#aiModal"
+                  >
+                    <i class="bi bi-cpu"></i> Ask AI
+                  </a>
+                </label>
                 <textarea
                   v-model="form.responsibilities"
                   class="form-control"

@@ -109,7 +109,7 @@ const openImageModal = () => {
 }
 
 onMounted(() => {
-  getData()
+  getData(), document.getElementById('case-study').classList.add('nav-active')
 })
 </script>
 

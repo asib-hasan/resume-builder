@@ -558,8 +558,8 @@ h6 {
   list-style: none;
 }
 .sidebar-nav li {
-  padding: 0;
-  margin: 0;
+  padding: 5px 5px 5px 5px;
+  margin: 0px 5px 5px 5px;
   list-style: none;
 }
 .sidebar-nav .nav-item {
@@ -575,7 +575,7 @@ h6 {
 .sidebar-nav .nav-link {
   display: flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
   color: black;
   padding: 2px 15px;

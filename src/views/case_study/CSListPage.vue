@@ -69,7 +69,7 @@ const toggleStatus = async (id, status) => {
 }
 
 onMounted(() => {
-  fetchData()
+  fetchData(), document.getElementById('case-study').classList.add('nav-active')
 })
 </script>
 

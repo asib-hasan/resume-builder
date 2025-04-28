@@ -69,7 +69,7 @@ const toggleStatus = async (id, status) => {
 }
 
 onMounted(() => {
-  fetchData()
+  fetchData(), document.getElementById('my-blog').classList.add('nav-active')
 })
 </script>
 

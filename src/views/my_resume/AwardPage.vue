@@ -45,7 +45,9 @@ export default {
       }
     }
 
-    onMounted(fetchAwards)
+    onMounted(() => {
+      document.getElementById('my-resume').classList.add('nav-active'), fetchAwards()
+    })
 
     const rules = computed(() => ({
       title: { required },
@@ -233,13 +235,18 @@ export default {
               >
             </li>
             <li class="nav-item tab-style">
-              <router-link to="/resume/interest" class="nav-link font-weight-bold"
+              <router-link to="/resume/interests" class="nav-link font-weight-bold"
                 >Interest</router-link
               >
             </li>
             <li class="nav-item tab-style">
               <router-link to="/resume/publications" class="nav-link font-weight-bold"
                 >Publications</router-link
+              >
+            </li>
+            <li class="nav-item tab-style">
+              <router-link to="/resume/languages" class="nav-link font-weight-bold"
+                >Language</router-link
               >
             </li>
             <li class="nav-item tab-style">

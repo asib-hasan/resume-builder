@@ -51,7 +51,9 @@ export default {
       ).show()
     }
 
-    onMounted(fetchCertifications)
+    onMounted(() => {
+      document.getElementById('my-resume').classList.add('nav-active'), fetchCertifications()
+    })
 
     const handleFileChange = (event) => {
       form.value.image = event.target.files[0]
