@@ -39,7 +39,7 @@ export default {
     const editCurrentlyWorking = ref(false)
 
     const experiences = ref([])
-
+    const deleteTarget = ref({ id: null })
     const sortKey = ref('')
     const sortOrder = ref('asc')
 
@@ -134,32 +134,6 @@ export default {
       v$.value.$reset()
     }
 
-    const deleteExperience = async (id) => {
-      if (!confirm('Are you sure?')) return
-      try {
-        const response = await axios.delete(`http://127.0.0.1:8000/api/experiences/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        if (response.status === 200) {
-          toast.success('Experience deleted successfully!')
-          fetchExperiences()
-        } else {
-          toast.error('Failed to delete experience.')
-        }
-      } catch (error) {
-        // Handle errors
-        if (error.response && error.response.status === 422) {
-          toast.error('Validation error occurred.')
-        } else {
-          toast.error('Server error occurred.')
-          console.error(error)
-        }
-      }
-    }
-
     const editExperience = (experience) => {
       editForm.value = { ...experience }
       editCurrentlyWorking.value = experience.currentlyWorking
@@ -208,6 +182,25 @@ export default {
           toast.error('Server error occurred.')
           console.error(error)
         }
+      }
+    }
+
+    const confirmDelete = (item) => {
+      deleteTarget.value = { id: item.id, details: item.details }
+      window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).show()
+    }
+
+    const performDelete = async () => {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/experiences/${deleteTarget.value.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        toast.success('Publication deleted!')
+        fetchExperiences()
+      } catch {
+        toast.error('Delete failed.')
+      } finally {
+        window.bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide()
       }
     }
 
@@ -309,7 +302,6 @@ export default {
       currentlyWorking,
       aiQuestion,
       experiences,
-      deleteExperience,
       editExperience,
       editingIndex,
       editForm,
@@ -319,6 +311,8 @@ export default {
       sortOrder,
       sortBy,
       onSortEnd,
+      confirmDelete,
+      performDelete,
     }
   },
 }
@@ -389,25 +383,34 @@ export default {
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-4">
                 <label class="form-label">Job Title <span class="required-mask">*</span></label>
-                <input v-model="form.job_title" type="text" class="form-control" />
-                <div v-if="v$.job_title.$dirty && v$.job_title.$error" class="text-danger">
-                  Job title required
-                </div>
+                <input
+                  v-model="form.job_title"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.job_title.$dirty && v$.job_title.$error }"
+                />
+                <div v-if="v$.job_title.$error" class="error-msg">Job title required</div>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Company Name <span class="required-mask">*</span></label>
-                <input v-model="form.company_name" type="text" class="form-control" />
-                <div v-if="v$.company_name.$dirty && v$.company_name.$error" class="text-danger">
-                  Company name required
-                </div>
+                <input
+                  v-model="form.company_name"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.company_name.$dirty && v$.company_name.$error }"
+                />
+                <div v-if="v$.company_name.$error" class="error-msg">Company name required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Start Date <span class="required-mask">*</span></label>
-                <input v-model="form.start_date" type="date" class="form-control" />
-                <div v-if="v$.start_date.$dirty && v$.start_date.$error" class="text-danger">
-                  Start date required
-                </div>
+                <input
+                  v-model="form.start_date"
+                  type="date"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.start_date.$dirty && v$.start_date.$error }"
+                />
+                <div v-if="v$.start_date.$error" class="error-msg">Start date required</div>
               </div>
 
               <div class="col-md-4">
@@ -416,6 +419,7 @@ export default {
                   v-model="form.end_date"
                   type="date"
                   class="form-control"
+                  :class="{ 'is-invalid': v$.end_date?.$dirty && v$.end_date?.$error }"
                   :disabled="currentlyWorking"
                 />
                 <div class="form-check mt-2">
@@ -430,9 +434,7 @@ export default {
                     <small>Currently Working</small>
                   </label>
                 </div>
-                <div v-if="v$.end_date?.$dirty && v$.end_date?.$error" class="text-danger">
-                  End date required
-                </div>
+                <div v-if="v$.end_date?.$error" class="error-msg">End date required</div>
               </div>
 
               <div class="col-md-12">
@@ -451,12 +453,12 @@ export default {
                   v-model="form.responsibilities"
                   class="form-control"
                   rows="5"
+                  :class="{
+                    'is-invalid': v$.responsibilities.$dirty && v$.responsibilities.$error,
+                  }"
                   placeholder="Describe your responsibilities..."
                 ></textarea>
-                <div
-                  v-if="v$.responsibilities.$dirty && v$.responsibilities.$error"
-                  class="text-danger"
-                >
+                <div v-if="v$.responsibilities.$error" class="error-msg">
                   Responsibilities required
                 </div>
               </div>
@@ -573,15 +575,12 @@ export default {
                       </td>
                       <td>{{ element.responsibilities }}</td>
                       <td>
-                        <button
-                          class="btn btn-sm btn-info me-1 text-white"
-                          @click="editExperience(element)"
-                        >
-                          Edit
-                        </button>
-                        <button class="btn btn-sm btn-danger" @click="deleteExperience(element.id)">
-                          Delete
-                        </button>
+                        <a href="#" @click.prevent="editExperience(element)" class="text-primary">
+                          <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="#" @click.prevent="confirmDelete(element)" class="text-danger">
+                          <i class="bi bi-trash"></i> Delete
+                        </a>
                       </td>
                     </tr>
                   </template>
@@ -675,6 +674,53 @@ export default {
               </div>
             </div>
             <!-- End Edit Experience Modal -->
+            <!-- Delete Modal -->
+            <div
+              class="modal fade"
+              id="deleteModal"
+              tabindex="-1"
+              aria-labelledby="confirmDeleteLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" style="max-width: 400px">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <div class="row mt-3">
+                      <div class="col-md-12 text-center circle">
+                        <i
+                          class="bi bi-exclamation-triangle-fill text-danger"
+                          style="border-radius: 50%; padding: 4px; background-color: #facdcd"
+                        ></i>
+                      </div>
+                      <div class="col-md-12 text-center mt-3">
+                        <h5 class="font-weight-bold">Are you sure?</h5>
+                      </div>
+                      <div class="col-md-12 text-center text-muted">
+                        <p>
+                          This action cannot be undone. All values associated this field will be
+                          lost
+                        </p>
+                      </div>
+                      <div class="col-md-12 text-center">
+                        <button type="button" class="btn btn-danger w-100" @click="performDelete">
+                          Delete Field
+                        </button>
+                      </div>
+                      <div class="col-md-12 text-center mt-2">
+                        <button
+                          type="button"
+                          class="btn btn-secondary w-100"
+                          data-bs-dismiss="modal"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Delete Modal -->
           </div>
         </div>
       </div>

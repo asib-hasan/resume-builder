@@ -60,7 +60,7 @@ const toggleStatus = async (id, status) => {
         },
       },
     )
-    toast.success('Case study status updated successfully!')
+    toast.success('Case study status updated!')
     fetchData()
   } catch (error) {
     console.error(error)

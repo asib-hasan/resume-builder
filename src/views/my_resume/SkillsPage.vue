@@ -60,7 +60,7 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (response.status === 201) {
-          toast.success('Skill saved!')
+          toast.success('Skill information added!')
           fetchSkills()
           resetForm()
         }
@@ -77,7 +77,7 @@ export default {
     const confirmDelete = (skill) => {
       deleteTarget.value = { id: skill.id, title: skill.title }
       const modal = window.bootstrap.Modal.getOrCreateInstance(
-        document.getElementById('confirmDeleteModal'),
+        document.getElementById('deleteModal'),
       )
       modal.show()
     }
@@ -88,14 +88,12 @@ export default {
         await axios.delete(`http://127.0.0.1:8000/api/skills/${deleteTarget.value.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        toast.success(`Deleted: ${deleteTarget.value.title}`)
+        toast.success(`Skill information deleted!`)
         fetchSkills()
       } catch {
         toast.error('Error deleting skill.')
       } finally {
-        const modal = window.bootstrap.Modal.getInstance(
-          document.getElementById('confirmDeleteModal'),
-        )
+        const modal = window.bootstrap.Modal.getInstance(document.getElementById('deleteModal'))
         modal.hide()
       }
     }
@@ -115,7 +113,7 @@ export default {
           { headers: { Authorization: `Bearer ${token}` } },
         )
         if (response.status === 200) {
-          toast.success('Skill updated!')
+          toast.success('Skill information updated!')
           fetchSkills()
           window.bootstrap.Modal.getInstance(document.getElementById('editSkillModal')).hide()
         }
@@ -362,40 +360,54 @@ export default {
               </div>
             </div>
             <!-- End Edit Skill Modal -->
+
+            <!-- Delete Modal -->
             <div
               class="modal fade"
-              id="confirmDeleteModal"
+              id="deleteModal"
               tabindex="-1"
               aria-labelledby="confirmDeleteLabel"
               aria-hidden="true"
             >
-              <div class="modal-dialog">
+              <div class="modal-dialog" style="max-width: 400px">
                 <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteLabel">Confirm Delete</h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    ></button>
-                  </div>
                   <div class="modal-body">
-                    Are you sure you want to delete "<strong>{{ deleteTarget.title }}</strong
-                    >"?
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                      Cancel
-                    </button>
-                    <button type="button" class="btn btn-danger" @click="performDelete">
-                      Delete
-                    </button>
+                    <div class="row mt-3">
+                      <div class="col-md-12 text-center circle">
+                        <i
+                          class="bi bi-exclamation-triangle-fill text-danger"
+                          style="border-radius: 50%; padding: 4px; background-color: #facdcd"
+                        ></i>
+                      </div>
+                      <div class="col-md-12 text-center mt-3">
+                        <h5 class="font-weight-bold">Are you sure?</h5>
+                      </div>
+                      <div class="col-md-12 text-center text-muted">
+                        <p>
+                          This action cannot be undone. All values associated this field will be
+                          lost
+                        </p>
+                      </div>
+                      <div class="col-md-12 text-center">
+                        <button type="button" class="btn btn-danger w-100" @click="performDelete">
+                          Delete Field
+                        </button>
+                      </div>
+                      <div class="col-md-12 text-center mt-2">
+                        <button
+                          type="button"
+                          class="btn btn-secondary w-100"
+                          data-bs-dismiss="modal"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <!-- End Delete Skill Modal -->
+            <!-- End Delete Modal -->
           </div>
         </div>
       </div>

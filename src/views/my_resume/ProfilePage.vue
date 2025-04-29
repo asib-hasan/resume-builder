@@ -135,46 +135,67 @@ onMounted(() => {
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-4">
                 <label class="form-label">First Name <span class="required-mask">*</span></label>
-                <input v-model="form.first_name" type="text" class="form-control" />
-                <div v-if="v$.first_name.$error" class="text-danger">First name is required</div>
+                <input
+                  v-model="form.first_name"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.first_name.$dirty && v$.first_name.$error }"
+                />
+                <div v-if="v$.first_name.$error" class="error-msg">First name required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Last Name <span class="required-mask">*</span></label>
-                <input v-model="form.last_name" type="text" class="form-control" />
-                <div v-if="v$.last_name.$error" class="text-danger">Last name is required</div>
+                <input
+                  v-model="form.last_name"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.last_name.$dirty && v$.last_name.$error }"
+                />
+                <div v-if="v$.last_name.$error" class="error-msg">Last name required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Gender <span class="required-mask">*</span></label>
-                <select v-model="form.gender" class="form-control">
+                <select
+                  v-model="form.gender"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.gender.$dirty && v$.gender.$error }"
+                >
                   <option value="">-- Select --</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </select>
-                <div v-if="v$.gender.$error" class="text-danger">Gender is required</div>
+                <div v-if="v$.gender.$error" class="error-msg">Gender required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Date of Birth <span class="required-mask">*</span></label>
-                <input v-model="form.dob" type="date" class="form-control" />
-                <div v-if="v$.dob.$error" class="text-danger">Date of Birth is required</div>
+                <input
+                  v-model="form.dob"
+                  type="date"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.dob.$dirty && v$.dob.$error }"
+                />
+                <div v-if="v$.dob.$error" class="error-msg">Date of Birth required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label"
                   >Marital Status <span class="required-mask">*</span></label
                 >
-                <select v-model="form.marital_status" class="form-control">
+                <select
+                  v-model="form.marital_status"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.marital_status.$dirty && v$.marital_status.$error }"
+                >
                   <option value="">-- Select --</option>
                   <option value="1">Single</option>
                   <option value="2">Married</option>
                   <option value="3">Divorced</option>
                 </select>
-                <div v-if="v$.marital_status.$error" class="text-danger">
-                  Marital status is required
-                </div>
+                <div v-if="v$.marital_status.$error" class="error-msg">Marital status required</div>
               </div>
 
               <div class="col-md-4">
@@ -183,29 +204,43 @@ onMounted(() => {
                   v-model="form.profession"
                   type="text"
                   class="form-control"
+                  :class="{ 'is-invalid': v$.profession.$dirty && v$.profession.$error }"
                   placeholder="eg. Professor"
                 />
-                <div v-if="v$.profession.$error" class="text-danger">Profession is required</div>
+                <div v-if="v$.profession.$error" class="error-msg">Profession required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Address <span class="required-mask">*</span></label>
-                <input v-model="form.address" type="text" class="form-control" />
-                <div v-if="v$.address.$error" class="text-danger">Address is required</div>
+                <input
+                  v-model="form.address"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.address.$dirty && v$.address.$error }"
+                />
+                <div v-if="v$.address.$error" class="error-msg">Address required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Phone <span class="required-mask">*</span></label>
-                <input v-model="form.phone" type="text" class="form-control" />
-                <div v-if="v$.phone.$error" class="text-danger">
-                  Phone must be at least 10 digits
-                </div>
+                <input
+                  v-model="form.phone"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.phone.$dirty && v$.phone.$error }"
+                />
+                <div v-if="v$.phone.$error" class="error-msg">Phone must be at least 10 digits</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Email <span class="required-mask">*</span></label>
-                <input v-model="form.email" type="email" class="form-control" />
-                <div v-if="v$.email.$error" class="text-danger">Valid email is required</div>
+                <input
+                  v-model="form.email"
+                  type="email"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.email.$dirty && v$.email.$error }"
+                />
+                <div v-if="v$.email.$error" class="error-msg">Valid email required</div>
               </div>
 
               <div class="col-md-12">
@@ -220,10 +255,13 @@ onMounted(() => {
                     <i class="bi bi-cpu"></i> Ask AI
                   </a>
                 </label>
-                <div class="border rounded">
+                <div
+                  class="border rounded"
+                  :class="{ 'is-invalid': v$.summary.$dirty && v$.summary.$error }"
+                >
                   <CustomEditor v-model="form.summary" />
                 </div>
-                <div v-if="v$.summary.$error" class="text-danger mt-1">Summary is required</div>
+                <div v-if="v$.summary.$error" class="error-msg mt-1">Summary required</div>
               </div>
 
               <div class="col-md-1">

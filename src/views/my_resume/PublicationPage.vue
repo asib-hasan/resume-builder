@@ -22,7 +22,7 @@ export default {
     const publications = ref([])
     const selectedDetails = ref('')
 
-    const deleteTarget = ref({ id: null, details: '' })
+    const deleteTarget = ref({ id: null })
 
     const rules = computed(() => ({
       details: { required },
@@ -99,7 +99,7 @@ export default {
     }
 
     const confirmDelete = (item) => {
-      deleteTarget.value = { id: item.id, details: item.details }
+      deleteTarget.value = { id: item.id }
       window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).show()
     }
 

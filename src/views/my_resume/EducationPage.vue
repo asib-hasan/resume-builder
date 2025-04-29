@@ -40,6 +40,7 @@ export default {
     const educations = ref([])
     const sortKey = ref('')
     const sortOrder = ref('asc')
+    const deleteTarget = ref({ id: null })
 
     const fetchEducations = async () => {
       try {
@@ -80,7 +81,7 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (response.status === 201) {
-          toast.success('Education saved!')
+          toast.success('Education information added!')
           fetchEducations()
           resetForm()
         }
@@ -109,7 +110,7 @@ export default {
         await axios.delete(`http://127.0.0.1:8000/api/educations/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        toast.success('Education deleted.')
+        toast.success('Education information deleted.')
         fetchEducations()
       } catch {
         toast.error('Error deleting education.')
@@ -135,12 +136,31 @@ export default {
           },
         )
         if (response.status === 200) {
-          toast.success('Education updated!')
+          toast.success('Education information updated!')
           fetchEducations()
           window.bootstrap.Modal.getInstance(document.getElementById('editEducationModal')).hide()
         }
       } catch {
         toast.error('Error updating education.')
+      }
+    }
+
+    const confirmDelete = (item) => {
+      deleteTarget.value = { id: item.id }
+      window.bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).show()
+    }
+
+    const performDelete = async () => {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/educations/${deleteTarget.value.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        toast.success('Education deleted!')
+        fetchEducations()
+      } catch {
+        toast.error('Delete failed.')
+      } finally {
+        window.bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide()
       }
     }
 
@@ -194,6 +214,8 @@ export default {
       sortOrder,
       sortBy,
       onSortEnd,
+      performDelete,
+      confirmDelete,
     }
   },
 }
@@ -263,53 +285,79 @@ export default {
             <form @submit.prevent="submitForm" class="row g-3">
               <div class="col-md-4">
                 <label class="form-label">Institute <span class="required-mask">*</span></label>
-                <input v-model="form.institute" type="text" class="form-control" />
-                <div v-if="v$.institute.$dirty && v$.institute.$error" class="text-danger">
-                  Institute required
-                </div>
+                <input
+                  v-model="form.institute"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.institute.$dirty && v$.institute.$error }"
+                />
+                <div v-if="v$.institute.$error" class="error-msg">Institute required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">City <span class="required-mask">*</span></label>
-                <input v-model="form.city" type="text" class="form-control" />
-                <div v-if="v$.city.$dirty && v$.city.$error" class="text-danger">City required</div>
+                <input
+                  v-model="form.city"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.city.$dirty && v$.city.$error }"
+                />
+                <div v-if="v$.city.$error" class="error-msg">City required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Degree <span class="required-mask">*</span></label>
-                <input v-model="form.degree" type="text" class="form-control" />
-                <div v-if="v$.degree.$dirty && v$.degree.$error" class="text-danger">
-                  Degree required
-                </div>
+                <input
+                  v-model="form.degree"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.degree.$dirty && v$.degree.$error }"
+                />
+                <div v-if="v$.degree.$error" class="error-msg">Degree required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Field of Study</label>
-                <input v-model="form.field_of_study" type="text" class="form-control" />
+                <input
+                  v-model="form.field_of_study"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.field_of_study.$dirty && v$.field_of_study.$error }"
+                />
+                <div v-if="v$.field_of_study.$error" class="error-msg">Field of study required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Start Date <span class="required-mask">*</span></label>
-                <input v-model="form.start_date" type="date" class="form-control" />
-                <div v-if="v$.start_date.$dirty && v$.start_date.$error" class="text-danger">
-                  Start date required
-                </div>
+                <input
+                  v-model="form.start_date"
+                  type="date"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.start_date.$dirty && v$.start_date.$error }"
+                />
+                <div v-if="v$.start_date.$error" class="error-msg">Start date required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">End Date <span class="required-mask">*</span></label>
-                <input v-model="form.end_date" type="date" class="form-control" />
-                <div v-if="v$.end_date?.$dirty && v$.end_date?.$error" class="text-danger">
-                  End date required
-                </div>
+                <input
+                  v-model="form.end_date"
+                  type="date"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.end_date.$dirty && v$.end_date.$error }"
+                />
+                <div v-if="v$.end_date.$error" class="error-msg">End date required</div>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Result <span class="required-mask">*</span></label>
-                <input v-model="form.result" type="text" class="form-control" />
-                <div v-if="v$.result?.$dirty && v$.result?.$error" class="text-danger">
-                  Result required
-                </div>
+                <input
+                  v-model="form.result"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': v$.result.$dirty && v$.result.$error }"
+                />
+                <div v-if="v$.result.$error" class="error-msg">Result required</div>
               </div>
 
               <div class="col-md-2">
@@ -354,15 +402,12 @@ export default {
                       <td>{{ new Date(element.start_date).toLocaleDateString() }}</td>
                       <td>{{ new Date(element.end_date).toLocaleDateString() }}</td>
                       <td>
-                        <button
-                          class="btn btn-sm btn-info me-1 text-white"
-                          @click="editEducation(element)"
-                        >
-                          Edit
-                        </button>
-                        <button class="btn btn-sm btn-danger" @click="deleteEducation(element.id)">
-                          Delete
-                        </button>
+                        <a href="#" @click.prevent="editEducation(element)" class="text-primary">
+                          <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="#" @click.prevent="confirmDelete(element)" class="text-danger">
+                          <i class="bi bi-trash"></i> Delete
+                        </a>
                       </td>
                     </tr>
                   </template>
@@ -433,6 +478,54 @@ export default {
               </div>
             </div>
             <!-- End Edit Education Modal -->
+
+            <!-- Delete Modal -->
+            <div
+              class="modal fade"
+              id="deleteModal"
+              tabindex="-1"
+              aria-labelledby="confirmDeleteLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" style="max-width: 400px">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <div class="row mt-3">
+                      <div class="col-md-12 text-center circle">
+                        <i
+                          class="bi bi-exclamation-triangle-fill text-danger"
+                          style="border-radius: 50%; padding: 4px; background-color: #facdcd"
+                        ></i>
+                      </div>
+                      <div class="col-md-12 text-center mt-3">
+                        <h5 class="font-weight-bold">Are you sure?</h5>
+                      </div>
+                      <div class="col-md-12 text-center text-muted">
+                        <p>
+                          This action cannot be undone. All values associated this field will be
+                          lost
+                        </p>
+                      </div>
+                      <div class="col-md-12 text-center">
+                        <button type="button" class="btn btn-danger w-100" @click="performDelete">
+                          Delete Field
+                        </button>
+                      </div>
+                      <div class="col-md-12 text-center mt-2">
+                        <button
+                          type="button"
+                          class="btn btn-secondary w-100"
+                          data-bs-dismiss="modal"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Delete Modal -->
           </div>
         </div>
       </div>
