@@ -41,6 +41,7 @@ export default {
     const sortKey = ref('')
     const sortOrder = ref('asc')
     const deleteTarget = ref({ id: null })
+    const educationDetails = ref({})
 
     const fetchEducations = async () => {
       try {
@@ -125,6 +126,11 @@ export default {
       ).show()
     }
 
+    const showDetails = (education) => {
+      educationDetails.value = education
+      window.bootstrap.Modal.getOrCreateInstance(document.getElementById('detailsModal')).show()
+    }
+
     const updateEducation = async () => {
       if (editingIndex.value === null) return
       try {
@@ -140,8 +146,16 @@ export default {
           fetchEducations()
           window.bootstrap.Modal.getInstance(document.getElementById('editEducationModal')).hide()
         }
-      } catch {
-        toast.error('Error updating education.')
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+          const errors = error.response.data.errors
+          for (const key in errors) {
+            toast.error(errors[key][0])
+          }
+        } else {
+          toast.error('Server error occurred.')
+          console.error(error)
+        }
       }
     }
 
@@ -216,6 +230,8 @@ export default {
       onSortEnd,
       performDelete,
       confirmDelete,
+      showDetails,
+      educationDetails,
     }
   },
 }
@@ -402,6 +418,9 @@ export default {
                       <td>{{ new Date(element.start_date).toLocaleDateString() }}</td>
                       <td>{{ new Date(element.end_date).toLocaleDateString() }}</td>
                       <td>
+                        <a href="#" @click.prevent="showDetails(element)" class="text-info">
+                          <i class="bi bi-eye"></i> Details
+                        </a>
                         <a href="#" @click.prevent="editEducation(element)" class="text-primary">
                           <i class="bi bi-pencil"></i> Edit
                         </a>
@@ -443,28 +462,44 @@ export default {
                     </div>
                     <div class="modal-body row g-3">
                       <div class="col-md-4">
-                        <label class="form-label">Institute</label>
+                        <label class="form-label"
+                          >Institute <span class="required-mask">*</span></label
+                        >
                         <input v-model="editForm.institute" type="text" class="form-control" />
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">City</label>
+                        <label class="form-label">City <span class="required-mask">*</span></label>
                         <input v-model="editForm.city" type="text" class="form-control" />
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">Degree</label>
+                        <label class="form-label"
+                          >Degree <span class="required-mask">*</span></label
+                        >
                         <input v-model="editForm.degree" type="text" class="form-control" />
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">Field of Study</label>
+                        <label class="form-label"
+                          >Field of Study <span class="required-mask">*</span></label
+                        >
                         <input v-model="editForm.field_of_study" type="text" class="form-control" />
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">Start Date</label>
+                        <label class="form-label"
+                          >Start Date <span class="required-mask">*</span></label
+                        >
                         <input v-model="editForm.start_date" type="date" class="form-control" />
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">End Date</label>
+                        <label class="form-label"
+                          >End Date <span class="required-mask">*</span></label
+                        >
                         <input v-model="editForm.end_date" type="date" class="form-control" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label"
+                          >Result <span class="required-mask">*</span></label
+                        >
+                        <input v-model="editForm.result" type="text" class="form-control" />
                       </div>
                     </div>
                     <div class="modal-footer">
@@ -526,6 +561,56 @@ export default {
               </div>
             </div>
             <!-- End Delete Modal -->
+
+            <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Education Details</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <table class="table table-sm table-bordered">
+                      <tbody>
+                        <tr>
+                          <th>Institute</th>
+                          <td>{{ educationDetails.institute }}</td>
+                        </tr>
+                        <tr>
+                          <th>City</th>
+                          <td>{{ educationDetails.city }}</td>
+                        </tr>
+                        <tr>
+                          <th>Degree</th>
+                          <td>{{ educationDetails.degree }}</td>
+                        </tr>
+                        <tr>
+                          <th>Field of Study</th>
+                          <td>{{ educationDetails.field_of_study }}</td>
+                        </tr>
+                        <tr>
+                          <th>Start Date</th>
+                          <td>{{ new Date(educationDetails.start_date).toLocaleDateString() }}</td>
+                        </tr>
+                        <tr>
+                          <th>End Date</th>
+                          <td>{{ new Date(educationDetails.end_date).toLocaleDateString() }}</td>
+                        </tr>
+                        <tr>
+                          <th>Result</th>
+                          <td>{{ educationDetails.result }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

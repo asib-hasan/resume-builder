@@ -7,6 +7,10 @@ import useVuelidate from '@vuelidate/core'
 import { required, email, minLength } from '@vuelidate/validators'
 import { ref } from 'vue'
 import { useToast } from 'vue-toast-notification'
+import { baseURL } from '@/config'
+
+const token = localStorage.getItem('token')
+const toast = useToast()
 
 const form = ref({
   first_name: '',
@@ -33,16 +37,78 @@ const rules = {
   email: { required, email },
   summary: { required },
 }
-
 const v$ = useVuelidate(rules, form)
-const token = localStorage.getItem('token')
-const toast = useToast()
+
+const aiQuestion = ref('')
+const isLoading = ref(false)
+
+const askAI = async () => {
+  const question = aiQuestion.value.trim()
+  if (!question) {
+    toast.error('Please enter a question before asking AI')
+    return
+  }
+
+  isLoading.value = true
+  try {
+    const response = await axios.get(`${baseURL}/api/ask/openai`, {
+      params: {
+        question: question, // or just "question" if variable name is same
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    form.value.summary = response.data.message
+    console.log(response.data)
+  } catch (error) {
+    if (error.response && error.response.status === 422) {
+      const errors = error.response.data.errors
+      for (const key in errors) {
+        toast.error(errors[key][0])
+      }
+    } else if (error.response && error.response.status === 404) {
+      toast.error('Experience not found.')
+    } else {
+      toast.error('Server error occurred.')
+      console.error(error)
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const getData = async () => {
+  try {
+    const response = await axios.get(`${baseURL}/api/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const data = response.data.data
+    form.value.first_name = data.first_name
+    form.value.last_name = data.last_name
+    form.value.address = data.address
+    form.value.phone = data.phone
+    form.value.email = data.email
+    form.value.marital_status = data.marital_status
+    form.value.profession = data.profession
+    form.value.summary = data.summary
+    form.value.gender = data.gender
+    form.value.dob = data.dob
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 const submitForm = async () => {
   v$.value.$validate()
   if (!v$.value.$error) {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/profile', form.value, {
+      await axios.post('http://127.0.0.1:8000/api/profile', form.value, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -50,7 +116,7 @@ const submitForm = async () => {
       })
 
       toast.success('Profile updated successfully')
-      console.log(response.data)
+      getData()
     } catch (error) {
       console.error(error)
       if (error.response && error.response.status === 422) {
@@ -67,6 +133,7 @@ const submitForm = async () => {
 }
 onMounted(() => {
   document.getElementById('my-resume').classList.add('nav-active')
+  getData()
 })
 </script>
 

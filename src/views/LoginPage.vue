@@ -10,8 +10,8 @@ export default {
     const router = useRouter()
 
     const form = ref({
-      email: '',
-      password: '',
+      email: 'abc@mail.com',
+      password: 'asib7788',
     })
 
     const rules = {

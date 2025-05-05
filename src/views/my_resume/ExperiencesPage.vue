@@ -521,36 +521,52 @@ export default {
               <table class="table table-bordered table-sm">
                 <thead>
                   <tr>
-                    <th @click="sortBy('job_title')" style="cursor: pointer">
+                    <th
+                      class="table-td-width-25"
+                      @click="sortBy('job_title')"
+                      style="cursor: pointer"
+                    >
                       Job Title
                       <i
                         v-if="sortKey === 'job_title'"
                         :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
                       ></i>
                     </th>
-                    <th @click="sortBy('company_name')" style="cursor: pointer">
+                    <th
+                      class="table-td-width-15"
+                      @click="sortBy('company_name')"
+                      style="cursor: pointer"
+                    >
                       Company Name
                       <i
                         v-if="sortKey === 'company_name'"
                         :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
                       ></i>
                     </th>
-                    <th @click="sortBy('start_date')" style="cursor: pointer">
+                    <th
+                      class="table-td-width-10"
+                      @click="sortBy('start_date')"
+                      style="cursor: pointer"
+                    >
                       Start Date
                       <i
                         v-if="sortKey === 'start_date'"
                         :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
                       ></i>
                     </th>
-                    <th @click="sortBy('end_date')" style="cursor: pointer">
+                    <th
+                      class="table-td-width-10"
+                      @click="sortBy('end_date')"
+                      style="cursor: pointer"
+                    >
                       End Date
                       <i
                         v-if="sortKey === 'end_date'"
                         :class="sortOrder === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down'"
                       ></i>
                     </th>
-                    <th>Responsibilities</th>
-                    <th>Actions</th>
+                    <th class="table-td-width-40">Responsibilities</th>
+                    <th class="table-td-width-10">Actions</th>
                   </tr>
                 </thead>
 
@@ -573,7 +589,7 @@ export default {
                             : new Date(element.end_date).toLocaleDateString()
                         }}
                       </td>
-                      <td>{{ element.responsibilities }}</td>
+                      <td style="white-space: initial">{{ element.responsibilities }}</td>
                       <td>
                         <a href="#" @click.prevent="editExperience(element)" class="text-primary">
                           <i class="bi bi-pencil"></i> Edit

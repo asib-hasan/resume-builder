@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import VueToast from 'vue-toast-notification'
 import 'quill/dist/quill.snow.css'
+import 'vue3-loading-overlay/dist/vue3-loading-overlay.css'
 
 import App from './App.vue'
 import router from './router'

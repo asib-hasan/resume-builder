@@ -93,8 +93,16 @@ export default {
           fetchPublications()
           window.bootstrap.Modal.getInstance(document.getElementById('editModal')).hide()
         }
-      } catch {
-        toast.error('Update failed.')
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+          const errors = error.response.data.errors
+          for (const key in errors) {
+            toast.error(errors[key][0])
+          }
+        } else {
+          toast.error('Server error occurred.')
+          console.error(error)
+        }
       }
     }
 
