@@ -195,7 +195,7 @@ export default {
         await axios.delete(`http://127.0.0.1:8000/api/experiences/${deleteTarget.value.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        toast.success('Publication deleted!')
+        toast.success('Experience deleted!')
         fetchExperiences()
       } catch {
         toast.error('Delete failed.')

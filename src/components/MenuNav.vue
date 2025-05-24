@@ -33,9 +33,9 @@
         </router-link>
       </li>
       <li id="website" class="nav-item">
-        <router-link class="nav-link" to="">
-          <i class="bi bi-globe"></i>
-          <span>Website</span>
+        <router-link class="nav-link" to="/photo/gallery">
+          <i class="bi bi-images"></i>
+          <span>Photo Gallery</span>
         </router-link>
       </li>
     </ul>

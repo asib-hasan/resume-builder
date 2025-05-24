@@ -397,8 +397,6 @@ export default {
                     <th>City</th>
                     <th>Degree</th>
                     <th>Field</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -415,8 +413,6 @@ export default {
                       <td>{{ element.city }}</td>
                       <td>{{ element.degree }}</td>
                       <td>{{ element.field_of_study }}</td>
-                      <td>{{ new Date(element.start_date).toLocaleDateString() }}</td>
-                      <td>{{ new Date(element.end_date).toLocaleDateString() }}</td>
                       <td>
                         <a href="#" @click.prevent="showDetails(element)" class="text-info">
                           <i class="bi bi-eye"></i> Details
