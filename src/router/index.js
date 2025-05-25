@@ -46,6 +46,18 @@ const router = createRouter({
       meta: { requiresAuth: true }, // Protected route
     },
     {
+      path: '/photo/gallery/',
+      name: 'photo-gallery',
+      component: () => import('../views/photo_gallery/PhotoGalleryPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
+      path: '/photo/gallery/:id/images',
+      name: 'photo-gallery-images',
+      component: () => import('../views/photo_gallery/AddPhotoPage.vue'),
+      meta: { requiresAuth: true }, // Protected route
+    },
+    {
       path: '/resume/profile',
       name: 'resume-profile',
       component: () => import('../views/my_resume/ProfilePage.vue'),

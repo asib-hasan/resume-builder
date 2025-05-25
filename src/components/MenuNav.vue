@@ -32,7 +32,7 @@
           <span>Web Contents</span>
         </router-link>
       </li>
-      <li id="website" class="nav-item">
+      <li id="photo-gallery" class="nav-item">
         <router-link class="nav-link" to="/photo/gallery">
           <i class="bi bi-images"></i>
           <span>Photo Gallery</span>
